@@ -16,3 +16,12 @@ cp -r etc/initramfs-tools/hooks/* /etc/initramfs-tools/hooks/
 
 # Copy initramfs-tools Scripts
 cp -r etc/initramfs-tools/scripts/* /etc/initramfs-tools/scripts/
+
+# Copy Executables
+cp -r usr/local/sbin/* /usr/local/sbin/
+
+# Ensure that the required Files have the executable bit set (chmod +x)
+chmod +x /usr/local/sbin/looptab
+chmod +x /etc/initramfs-tools/hooks/looptab
+chmod +x /etc/initramfs-tools/scripts/local-top/looptab
+

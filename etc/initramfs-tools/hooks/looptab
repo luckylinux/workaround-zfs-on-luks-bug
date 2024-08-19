@@ -21,5 +21,11 @@ if [ ! -x "/etc/looptab" ]; then
      exit 0
 fi
 
+# Copy Configuration File
 cp /etc/looptab "${DESTDIR}/etc"
+
+# Copy Binary
+cp /usr/local/sbin/looptab "${DESTDIR}/sbin"
+
+# Return OK
 exit 0

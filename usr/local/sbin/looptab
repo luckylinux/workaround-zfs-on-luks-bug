@@ -38,6 +38,5 @@ do
     losetup $loopDevice $sourceDevice
 done
 
-#while IFS= read -r line; do
-#    echo "Text read from file: $line"
-#done < $value
+# Return OK Code
+exit 0
