@@ -1,0 +1,43 @@
+#!/bin/sh
+
+if [ -f "/etc/looptab" ]
+then
+	# Read Configuration File (exclude Comment Lines)
+	value=`cat /etc/looptab | grep -vE "^#"`
+else
+	# Error
+	echo "ERROR: File /etc/looptab does NOT exist. Exiting."
+        exit 9
+fi
+
+# Create /dev/loop Folder
+if [ ! -d "/dev/loop" ]
+then
+    mkdir -p "/dev/loop"
+fi
+
+# Iterate over each Device
+cat /etc/looptab | grep -vE "^#" | while IFS= read -r line;
+do
+    # Echo
+    echo "Processing Line: $line"
+
+    # Extract "Source" Device
+    sourceDevice=`echo "$line" | cut -f1 -d'	'`
+
+    # Extract "Loop" Device
+    loopDevice=`echo "$line" | cut -f2 -d'	'`
+
+    # Create Loop Device
+    mknod -m650 $loopDevice b 7 0
+
+    # Ensure Correct Permissions
+    chown root:disk $loopDevice
+
+    # Mount Source Device to Loop Device
+    losetup $loopDevice $sourceDevice
+done
+
+#while IFS= read -r line; do
+#    echo "Text read from file: $line"
+#done < $value

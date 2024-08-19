@@ -1,0 +1,30 @@
+#!/bin/sh
+# looptab boot script
+
+PREREQ=""
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case $1 in
+prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+. /scripts/functions
+
+# Begin real processing below this line
+if [ ! -f "/etc/looptab" ]; then
+	panic "/etc/looptab Configuration File not found"
+fi
+
+if [ ! -x "/usr/local/sbin/looptab" ]; then
+	panic "/usr/local/sbin/looptab Executable not found"
+fi
+
+log_begin_msg "Starting looptab Setup"
+/usr/local/sbin/looptab || panic "Looptab Setup failed"
+log_end_msg

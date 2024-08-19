@@ -1,0 +1,4 @@
+# This is an Example Configuration File for /etc/looptab
+# The Separator between the crypt device ("Source") and the Loop Device to be Created **MUST** be a TAB (\t)
+/dev/mapper/XXXXXXXXXXXXXXXXXX_crypt	/dev/loop/XXXXXXXXXXXXXXXXXX_loop
+/dev/mapper/YYYYYYYYYYYYYYYYYY_crypt	/dev/loop/YYYYYYYYYYYYYYYYYY_loop
