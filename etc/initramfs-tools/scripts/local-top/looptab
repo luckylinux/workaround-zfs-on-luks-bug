@@ -21,10 +21,10 @@ if [ ! -f "/etc/looptab" ]; then
 	panic "/etc/looptab Configuration File not found"
 fi
 
-if [ ! -x "/usr/local/sbin/looptab" ]; then
-	panic "/usr/local/sbin/looptab Executable not found"
+if [ ! -x "/usr/sbin/looptab" ]; then
+	panic "/usr/sbin/looptab Executable not found"
 fi
 
 log_begin_msg "Starting looptab Setup"
-/usr/local/sbin/looptab || panic "Looptab Setup failed"
+/usr/sbin/looptab || panic "Looptab Setup failed"
 log_end_msg

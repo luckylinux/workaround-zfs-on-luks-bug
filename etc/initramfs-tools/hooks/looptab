@@ -1,7 +1,7 @@
 #!/bin/sh
 # looptab hook script
 
-PREREQ=""
+PREREQ="udev"
 prereqs()
 {
 	echo "$PREREQ"
@@ -17,15 +17,16 @@ esac
 . /usr/share/initramfs-tools/hook-functions
 # Begin real processing below this line
 
-if [ ! -x "/etc/looptab" ]; then
+if [ ! -f "/etc/looptab" ]; then
+     echo "ERROR: File /etc/looptab does NOT Exist. ABORTING ..."
      exit 0
 fi
 
 # Copy Configuration File
-cp /etc/looptab "${DESTDIR}/etc"
+copy_file config "/etc/looptab"
 
 # Copy Binary
-cp /usr/local/sbin/looptab "${DESTDIR}/sbin"
+copy_exec "/usr/sbin/looptab"
 
 # Return OK
 exit 0
