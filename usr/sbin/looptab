@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Print every Command being executed
-set -x
+#set -x
 
 # Define "losetup" Executable
 LOSETUP_BIN="losetup"                                                                 # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though
@@ -54,7 +54,7 @@ do
     if [ -b $sourceDevice ]
     then
         # Echo
-        echo "Executing Command: ${LOSETUP_BIN} $loopDevicePath $sourceDevice"
+        echo "Check Loop Device Status - Executing Command: ${LOSETUP_BIN} $loopDevicePath"
 
         # Check Status of Loop Device /dev/loopX to see if already mounted
         checkStatus=`${LOSETUP_BIN} $loopDevicePath`
@@ -62,21 +62,46 @@ do
         # Error code 0: Device exists and is initialized, code != 0 (e.g. 1): Device is not initialized
         loopDeviceStatusCode=$?
 
+        # Setup Loop Device ? By Default Yes !
+        setupLoopDevice=1
+
         if [ $loopDeviceStatusCode -eq 0 ]
         then
             # Echo
             echo "Device $loopDevicePath is already used. Details: $checkStatus"
-            echo "Removing Device $loopDevicePath before Re-Initializing it"
 
-            # Remove Device
-            ${LOSETUP_BIN} -d $loopDevicePath
+            # Ask if wanting to Remove it
+            #echo "Do you want to stop/remove Device $loopDevicePath (y/n)?"
+            #read removeLoopDevice < /dev/tty
+            read -p "Do you want to stop/remove Device $loopDevicePath (y/n) ? " removeLoopDevice < /dev/tty
+
+            if [ "$removeLoopDevice" != "${removeLoopDevice#[Yy]}" ]
+            then
+                 # Echo
+                 echo "Removing Device $loopDevicePath before Re-Initializing it"
+
+                 # Remove Device
+                 ${LOSETUP_BIN} -d $loopDevicePath
+            else
+                 # Echo
+                 echo "Skip Device $loopDevicePath Removal as requested by User"
+
+                 # Need to Mark that Device must NOT be (attempted to be) Setup again
+                 setupLoopDevice=0
+            fi
 
             # Sleep a bit
             sleep 1
         fi
 
-        # Mount Source Device to Loop Device (OLD SCHOOL - NOT NEEDED ANYMORE TO SPECIFY LOOP DEVICE ITSELF)
-        losetup $loopDevicePath $sourceDevice
+        if [ $setupLoopDevice -eq 1 ]
+        then
+            # Echo
+            echo "Mount Loop Device - Executing Command: ${LOSETUP_BIN} $loopDevicePath $sourceDevice"
+
+            # Mount Source Device to Loop Device
+            losetup $loopDevicePath $sourceDevice
+        fi
 
         # Check if Symlink already exists - If it already exists, delete the old Symlink
         if [ -L $loopDeviceCustomName ]
