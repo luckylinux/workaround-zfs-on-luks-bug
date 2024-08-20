@@ -17,11 +17,14 @@ cp -r usr/share/initramfs-tools/hooks/* /usr/share/initramfs-tools/hooks/
 # Copy initramfs-tools Scripts
 cp -r usr/share/initramfs-tools/scripts/* /usr/share/initramfs-tools/scripts/
 
+# Remove Files in Old Locations
+rm -f /usr/share/initramfs-tools/scripts/local-top/looptab
+
 # Copy Executables
 cp -r usr/sbin/* /usr/sbin/
 
 # Ensure that the required Files have the executable bit set (chmod +x)
 chmod +x /usr/sbin/looptab
 chmod +x /usr/share/initramfs-tools/hooks/looptab
-chmod +x /usr/share/initramfs-tools/scripts/local-top/looptab
+chmod +x /usr/share/initramfs-tools/scripts/local-premount/looptab
 

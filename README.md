@@ -138,8 +138,12 @@ ZPOOL_CACHE=""
 
 Make sure that all other `ZPOOL_IMPORT_OPTS` and `ZPOOL_CACHE` Lines are Commented !!!
 
-## Temporary Solution - Need to modify ZFS/OpenZFS initramfs Script
+## (Probably not needed anymore) Need to modify ZFS/OpenZFS initramfs Script
+~~
 This is required because, even if `PREREQ` is used correctly, for some Reason (to be investigated) the `looptab` Script (this Project) is executed BEFORE `clevis` even unlocks the Disks, so ZFS will either fall back to the `devid` or, in case the Cachefile is enfored, most likely just panic.
+~~
+
+This should **in principle** no longer be needed, since the Script is Stored in the `local-premount` Subfolder and NOT in the `local-top` Subfolder anymore !
 
 Manually Open `/usr/share/initramfs-tools/scripts/zfs` and Change according to the Provided Diff File:
 ```diff
@@ -152,7 +156,9 @@ Manually Open `/usr/share/initramfs-tools/scripts/zfs` and Change according to t
 +        # Setup Loopback Devices first
 +        if [ -x "/usr/sbin/looptab" ]
 +        then
++            echo "!!!! START /usr/sbin/looptab USING FALLBACK METHOD FROM ZFS INITRAMFS SCRIPT !!!!"
 +            /usr/sbin/looptab
++            echo "!!!! END /usr/sbin/looptab USING FALLBACK METHOD FROM ZFS INITRAMFS SCRIPT !!!!"
 +        fi
 +
  	ZFS_CMD="${ZPOOL} import -N ${ZPOOL_FORCE} ${ZPOOL_IMPORT_OPTS}"
