@@ -91,9 +91,18 @@ sed -Ei "s|^ZPOOL_IMPORT_OPTS=\"\"|#ZPOOL_IMPORT_OPTS=\"\"|" /etc/default/zfs
 sed -Ei "s|^#ZPOOL_IMPORT_OPTS=\"-c /etc/zfs/zpool.cache\"|ZPOOL_IMPORT_OPTS=\"-c /etc/zfs/zpool.cache\"|" /etc/default/zfs
 sed -Ei "s|^#ZPOOL_CACHE=\"\"|ZPOOL_CACHE=\"\"|" /etc/default/zfs
 
-
 # Regenerate Cachefile
 zpool set cachefile=/etc/zfs/zpool.cache rpool
+
+# Mount /boot if not mounted yet
+if mountpoint -q "/boot"
+then
+   # Already Mounted
+   x=1
+else
+   # Mount /boot
+   mount /boot
+fi
 
 # Regenerate Initramfs
 update-initramfs -k all -u
