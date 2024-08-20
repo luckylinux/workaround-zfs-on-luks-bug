@@ -3,6 +3,10 @@
 # Print every Command being executed
 set -x
 
+# Define "losetup" Executable
+LOSETUP_BIN="losetup"                                                                 # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though
+#LOSETUP_BIN="/usr/src/initramfs-investigation/6.8.0-40-generic/main/usr/bin/losetup" # Testing with uncompressed initramfs
+
 # Add new Line
 echo -e "\n"
 
@@ -52,27 +56,68 @@ do
     # Ensure Correct Permissions (OLD SCHOOL - NOT NEEDED ANYMORE)
     #chown root:disk $loopDeviceCustomName
 
-    # Echo
-    echo "Executing Command: losetup $loopDevicePath $sourceDevice"
+    # Check if Device Exists
+    if [ -b $sourceDevice ]
+    then
+        # Echo
+        echo "Executing Command: ${LOSETUP_BIN} $loopDevicePath $sourceDevice"
 
-    # Mount Source Device to Loop Device (OLD SCHOOL - NOT NEEDED ANYMORE TO SPECIFY LOOP DEVICE ITSELF)
-    losetup $loopDevicePath $sourceDevice
+        # Check Status of Loop Device /dev/loopX to see if already mounted
+        checkStatus=`${LOSETUP_BIN} $loopDevicePath`
 
-    # Create a Symlink for more Convenience in /dev/loop/ Subfolder
-    ln -s $loopDevicePath $loopDeviceCustomName
+        # Error code 0: Device exists and is initialized, code != 0 (e.g. 1): Device is not initialized
+        loopDeviceStatusCode=$?
 
+        if [ $loopDeviceStatusCode -eq 0 ]
+        then
+            # Echo
+            echo "Device $loopDevicePath is already used. Details: $checkStatus"
+            echo "Removing Device $loopDevicePath before Re-Initializing it"
 
-    # Not supported by the "losetup" initramfs executable (it doesn't recognize "--show" Option)
+            # Remove Device
+            ${LOSETUP_BIN} -d $loopDevicePath
 
-    # Echo
-    #echo "Executing Command: losetup -f --show $sourceDevice"
+            # Sleep a bit
+            sleep 1
+        fi
 
-    # Mount Source Device to Loop Device (NEW METHOD - Use First Available Device e.g. /dev/loop0)
-    #loopDeviceAuto=`losetup -f --show $sourceDevice`
-    #loopDeviceAuto=`losetup -f $sourceDevice`
+        # Mount Source Device to Loop Device (OLD SCHOOL - NOT NEEDED ANYMORE TO SPECIFY LOOP DEVICE ITSELF)
+        losetup $loopDevicePath $sourceDevice
 
-    # Create Symlink in /dev/loop/ Subfolder
-    #ln -s $loopDeviceAuto $loopDeviceCustomName
+        # Check if Symlink already exists - If it already exists, delete the old Symlink
+        if [ -L $loopDeviceCustomName ]
+        then
+            # Echo
+            echo "Symlink $loopDeviceCustomName already exists. Deleting it before recreating it."
+
+            # Remove Existing Link
+            rm $loopDeviceCustomName
+        fi
+
+        # Echo
+        echo "Create Symlink $loopDeviceCustomName pointing to $loopDevicePath"
+
+        # (Re)Create a Symlink for more Convenience in /dev/loop/ Subfolder
+        ln -s $loopDevicePath $loopDeviceCustomName
+
+        # Not supported by the "losetup" initramfs executable (it doesn't recognize "--show" Option)
+
+        # Echo
+        #echo "Executing Command: losetup -f --show $sourceDevice"
+
+        # Mount Source Device to Loop Device (NEW METHOD - Use First Available Device e.g. /dev/loop0)
+        #loopDeviceAuto=`losetup -f --show $sourceDevice`
+        #loopDeviceAuto=`losetup -f $sourceDevice`
+
+        # Create Symlink in /dev/loop/ Subfolder
+        #ln -s $loopDeviceAuto $loopDeviceCustomName
+
+        # Increase Counter
+        loopDeviceCounter=$((loopDeviceCounter+1))
+    else
+        # Echo
+        echo "Source Device $sourceDevice does NOT exist and/or is NOT a Block Device"
+    fi
 
     # Wait a bit
     sleep 1
