@@ -49,7 +49,7 @@ do
        echo "$value is a valid Block Device"
 
        # Check if it's the original LUKS Device Name
-       if [ "$value" == *"_crypt" ]
+       if [[ "$value" == *"_crypt" ]]
        then
            # Build LOOP Device Name
            loopDeviceName=`echo $value | sed -E "s|^([0-9a-zA-Z_-]+)_crypt$|\1_loop|"`
