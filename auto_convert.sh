@@ -52,7 +52,7 @@ do
        if [[ "$value" == *"_crypt" ]]
        then
            # Build LOOP Device Name
-           loopDeviceName=`echo $value | sed -E "s|^([0-9a-zA-Z_-]+)_crypt$|\1_loop|"`
+           loopDeviceName=`echo $value | sed -E "s|^(/dev/mapper/)?([0-9a-zA-Z_-]+)_crypt$|\2_loop|"`
 
            # If the name contains something like "dm-uuid-CRYPT-LUKS2-ac03ed5e9cdf491aac236204501f6bec-" prior to the REAL name of the LUKS Device Name matching in /etc/crypttab, then remove that part
            # That usually indicates a previous Attempt to use the /dev/loop/xxx Device which unfortunately "zpool import" couldn't find
@@ -62,13 +62,23 @@ do
            loopDevicePath="/dev/loop/$loopDeviceName"
 
            # Echo
-           echo "Replacing path=$value with path=$loopDevicePath in zpool"
+           echo "Assess whether to replace path=$value with path=$loopDevicePath in zpool"
 
-           # Perform Replacement
-           zpool set path=$loopDevicePath rpool $value
+           # Check that Loop Device Path / Symlink Exists
+           if [ -L "$loopDevicePath" ]
+           then
+               # Echo
+               echo "$loopDevicePath exists and is a Symlink. Performing Replacement."
 
-           # Wait a bit
-           sleep 5
+               # Perform Replacement
+               zpool set path=$loopDevicePath rpool $value
+
+               # Wait a bit
+               sleep 5
+           else
+               # Echo
+               echo "$loopDevicePath does NOT exists and/or is NOT a Symlink. Skip Replacement."
+           fi
        else
            # Echo
            echo "Device Path $value doesn't seem to indicate a LUKS Crypt Device"
