@@ -50,12 +50,6 @@ do
     # Build "Standardized" Device Path
     loopDevicePath="/dev/loop$loopDeviceNumber"
 
-    # Create Loop Device (OLD SCHOOL - NOT NEEDED ANYMORE)
-    #mknod -m650 $loopDevice b 7 $loopDeviceCounter
-
-    # Ensure Correct Permissions (OLD SCHOOL - NOT NEEDED ANYMORE)
-    #chown root:disk $loopDeviceCustomName
-
     # Check if Device Exists
     if [ -b $sourceDevice ]
     then
@@ -99,18 +93,6 @@ do
 
         # (Re)Create a Symlink for more Convenience in /dev/loop/ Subfolder
         ln -s $loopDevicePath $loopDeviceCustomName
-
-        # Not supported by the "losetup" initramfs executable (it doesn't recognize "--show" Option)
-
-        # Echo
-        #echo "Executing Command: losetup -f --show $sourceDevice"
-
-        # Mount Source Device to Loop Device (NEW METHOD - Use First Available Device e.g. /dev/loop0)
-        #loopDeviceAuto=`losetup -f --show $sourceDevice`
-        #loopDeviceAuto=`losetup -f $sourceDevice`
-
-        # Create Symlink in /dev/loop/ Subfolder
-        #ln -s $loopDeviceAuto $loopDeviceCustomName
 
         # Increase Counter
         loopDeviceCounter=$((loopDeviceCounter+1))

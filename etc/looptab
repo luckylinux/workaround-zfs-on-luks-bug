@@ -1,5 +1,5 @@
 # This is an Example Configuration File for /etc/looptab
-# The Separator between the crypt device ("Source") and the Loop Device to be Created **MUST** be a TAB (\t)
+# The Separator between each Column (ID, Crypt Device / "Source", Loop Device Alias) **MUST** be a TAB (\t)
 # ID    Source					Symlink
 0	/dev/mapper/XXXXXXXXXXXXXXXXXX_crypt	/dev/loop/XXXXXXXXXXXXXXXXXX_loop
 1	/dev/mapper/YYYYYYYYYYYYYYYYYY_crypt	/dev/loop/YYYYYYYYYYYYYYYYYY_loop
