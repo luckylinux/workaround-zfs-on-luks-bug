@@ -49,6 +49,29 @@ In order to get the `vdev` Names to be Converted/Replaced/Migrated to Loop Devic
 zpool status -v
 ```
 
+This yields:
+```
+  pool: rpool
+ state: ONLINE
+status: One or more features are enabled on the pool despite not being
+	requested by the 'compatibility' property.
+action: Consider setting 'compatibility' to an appropriate value, or
+	adding needed features to the relevant file in
+	/etc/zfs/compatibility.d or /usr/share/zfs/compatibility.d.
+  scan: scrub repaired 0B in 01:07:23 with 0 errors on Mon Aug 19 21:27:33 2024
+config:
+
+	NAME                                            STATE     READ WRITE CKSUM
+	rpool                                           ONLINE       0     0     0
+	  mirror-0                                      ONLINE       0     0     0
+	    ata-CT1000MX500SSD1_2301E6992CB7_crypt      ONLINE       0     0     0
+	    ata-CT1000MX500SSD1_2302E69AD9D0_crypt      ONLINE       0     0     0
+
+errors: No known data errors
+
+```
+
+
 Or alternatively by running:
 ```
 zpool get path rpool all-vdevs
@@ -59,9 +82,23 @@ Make sure that ALL Devices you want to be set up during Boot are configured in t
 /usr/sbin/looptab
 ```
 
+This yields:
+```
+NAME    PROPERTY  VALUE  SOURCE
+root-0  path      -      default
+mirror-0  path      -      default
+ata-CT1000MX500SSD1_2301E6992CB7_crypt  path      /dev/mapper/ata-CT1000MX500SSD1_2301E6992CB7_crypt  -
+ata-CT1000MX500SSD1_2302E69AD9D0_crypt  path      /dev/mapper/ata-CT1000MX500SSD1_2302E69AD9D0_crypt  -
+```
+
 In order to have an easy Copy-Paste Text, list all these newly created Devices:
 ```
 ls -l /dev/loop/*
+```
+
+```
+lrwxrwxrwx 1 root root 10 Aug 20 14:50 /dev/loop/ata-CT1000MX500SSD1_2301E6992CB7_loop -> /dev/loop1
+lrwxrwxrwx 1 root root 10 Aug 20 14:50 /dev/loop/ata-CT1000MX500SSD1_2302E69AD9D0_loop -> /dev/loop0
 ```
 
 ## Change Path of Disks/Devices/VDEVs
