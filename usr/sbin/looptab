@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# Print every Command being executed
+set -x
+
+# Add new Line
+echo -e "\n"
+
+# Echo
+echo "Setting up Loop Devices based on /etc/looptab"
+
 if [ -f "/etc/looptab" ]
 then
 	# Read Configuration File (exclude Comment Lines)
@@ -16,32 +25,54 @@ then
     mkdir -p "/dev/loop"
 fi
 
+# Initialize Counter
+loopDeviceCounter=0
+
 # Iterate over each Device
 cat /etc/looptab | grep -vE "^#" | while IFS= read -r line;
 do
     # Echo
     echo "Processing Line: $line"
 
-    # Extract "Source" Device
-    sourceDevice=`echo "$line" | cut -f1 -d'	'`
+    # Extract "ID"
+    loopDeviceNumber=`echo "$line" | cut -f1 -d'	'`
 
-    # Extract "Loop" Device
-    loopDevice=`echo "$line" | cut -f2 -d'	'`
+    # Extract "Source" Device
+    sourceDevice=`echo "$line" | cut -f2 -d'	'`
+
+    # Extract "Loop" Device with Custom Name
+    loopDeviceCustomName=`echo "$line" | cut -f3 -d'	'`
+
+    # Build "Standardized" Device Path
+    loopDevicePath="/dev/loop$loopDeviceNumber"
 
     # Create Loop Device (OLD SCHOOL - NOT NEEDED ANYMORE)
-    #mknod -m650 $loopDevice b 7 0
+    #mknod -m650 $loopDevice b 7 $loopDeviceCounter
 
     # Ensure Correct Permissions (OLD SCHOOL - NOT NEEDED ANYMORE)
-    #chown root:disk $loopDevice
+    #chown root:disk $loopDeviceCustomName
+
+    # Echo
+    echo "Executing Command: losetup $loopDevicePath $sourceDevice"
 
     # Mount Source Device to Loop Device (OLD SCHOOL - NOT NEEDED ANYMORE TO SPECIFY LOOP DEVICE ITSELF)
-    #losetup $loopDevice $sourceDevice
+    losetup $loopDevicePath $sourceDevice
 
-    # Mount Source Device to Loop Device (NEW METHOD - Use First Available Device)
-    loopDeviceAuto=`losetup -f --show $sourceDevice`
+    # Create a Symlink for more Convenience in /dev/loop/ Subfolder
+    ln -s $loopDevicePath $loopDeviceCustomName
+
+
+    # Not supported by the "losetup" initramfs executable (it doesn't recognize "--show" Option)
+
+    # Echo
+    #echo "Executing Command: losetup -f --show $sourceDevice"
+
+    # Mount Source Device to Loop Device (NEW METHOD - Use First Available Device e.g. /dev/loop0)
+    #loopDeviceAuto=`losetup -f --show $sourceDevice`
+    #loopDeviceAuto=`losetup -f $sourceDevice`
 
     # Create Symlink in /dev/loop/ Subfolder
-    ln -s $loopDeviceAuto $loopDevice
+    #ln -s $loopDeviceAuto $loopDeviceCustomName
 
     # Wait a bit
     sleep 1
