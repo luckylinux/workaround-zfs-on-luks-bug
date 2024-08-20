@@ -77,11 +77,6 @@ Or alternatively by running:
 zpool get path rpool all-vdevs
 ```
 
-Make sure that ALL Devices you want to be set up during Boot are configured in the `/etc/looptab` File, then Issue:
-```
-/usr/sbin/looptab
-```
-
 This yields:
 ```
 NAME    PROPERTY  VALUE  SOURCE
@@ -89,6 +84,11 @@ root-0  path      -      default
 mirror-0  path      -      default
 ata-CT1000MX500SSD1_2301E6992CB7_crypt  path      /dev/mapper/ata-CT1000MX500SSD1_2301E6992CB7_crypt  -
 ata-CT1000MX500SSD1_2302E69AD9D0_crypt  path      /dev/mapper/ata-CT1000MX500SSD1_2302E69AD9D0_crypt  -
+```
+
+Make sure that ALL Devices you want to be set up during Boot are configured in the `/etc/looptab` File, then Issue:
+```
+/usr/sbin/looptab
 ```
 
 In order to have an easy Copy-Paste Text, list all these newly created Devices:
