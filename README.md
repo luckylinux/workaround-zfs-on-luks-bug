@@ -40,3 +40,49 @@ For Instance:
 ```
 zpool get all rpool ata-CT1000MX500SSD1_2301E6992CB7_crypt
 ```
+
+
+Get Current Path:
+```
+zpool get path rpool ata-CT1000MX500SSD1_2301E6992CB7_crypt
+```
+
+Set New Path for the First Disk:
+```
+zpool set path=/dev/loop/ata-CT1000MX500SSD1_2301E6992CB7_loop rpool ata-CT1000MX500SSD1_2301E6992CB7_crypt
+```
+
+Set New Path for the Second Disk:
+```
+zpool set path=/dev/loop/ata-CT1000MX500SSD1_2302E69AD9D0_loop rpool ata-CT1000MX500SSD1_2302E69AD9D0_crypt
+```
+
+Run a Scrub after Changing Path(s):
+```
+zpool scrub rpool
+```
+
+Monitor Scrub Status:
+```
+watch 'zpool status -v'
+```
+
+LiveUSB: (Re)generate `/etc/zfs/zpool.cache` by forcing `zed` to restart:
+```
+killall zed; zed -F;
+```
+
+Force ZFS to generate cachefile:
+```
+zpool set cachefile=/etc/zfs/zpool.cache rpool
+```
+
+System Itself: using `systemctl`:
+```
+systemctl restart zfs-zed
+```
+
+Regenerate initramfs:
+```
+update-initramfs -v -k all -u
+```

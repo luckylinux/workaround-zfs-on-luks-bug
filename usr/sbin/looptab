@@ -28,14 +28,23 @@ do
     # Extract "Loop" Device
     loopDevice=`echo "$line" | cut -f2 -d'	'`
 
-    # Create Loop Device
-    mknod -m650 $loopDevice b 7 0
+    # Create Loop Device (OLD SCHOOL - NOT NEEDED ANYMORE)
+    #mknod -m650 $loopDevice b 7 0
 
-    # Ensure Correct Permissions
-    chown root:disk $loopDevice
+    # Ensure Correct Permissions (OLD SCHOOL - NOT NEEDED ANYMORE)
+    #chown root:disk $loopDevice
 
-    # Mount Source Device to Loop Device
-    losetup $loopDevice $sourceDevice
+    # Mount Source Device to Loop Device (OLD SCHOOL - NOT NEEDED ANYMORE TO SPECIFY LOOP DEVICE ITSELF)
+    #losetup $loopDevice $sourceDevice
+
+    # Mount Source Device to Loop Device (NEW METHOD - Use First Available Device)
+    loopDeviceAuto=`losetup -f --show $sourceDevice`
+
+    # Create Symlink in /dev/loop/ Subfolder
+    ln -s $loopDeviceAuto $loopDevice
+
+    # Wait a bit
+    sleep 1
 done
 
 # Return OK Code
