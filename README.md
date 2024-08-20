@@ -101,6 +101,29 @@ ZPOOL_CACHE=""
 
 Make sure that all other `ZPOOL_IMPORT_OPTS` and `ZPOOL_CACHE` Lines are Commented !!!
 
+## Temporary Solution - Need to modify ZFS/OpenZFS initramfs Script
+This is required because, even if `PREREQ` is used correctly, for some Reason (to be investigated) the `looptab` Script (this Project) is executed BEFORE `clevis` even unlocks the Disks, so ZFS will either fall back to the `devid` or, in case the Cachefile is enfored, most likely just panic.
+
+Manually Open `/usr/share/initramfs-tools/scripts/zfs` and Change according to the Provided Diff File:
+```diff
+--- /usr/share/initramfs-tools/scripts/zfs.orig	2024-08-20 15:14:18.170417535 +0200
++++ /usr/share/initramfs-tools/scripts/zfs	2024-08-20 15:17:11.195822061 +0200
+@@ -228,6 +228,12 @@
+ 	[ "$quiet" != "y" ] && zfs_log_begin_msg \
+ 		"Importing pool '${pool}' using defaults"
+ 
++        # Setup Loopback Devices first
++        if [ -x "/usr/sbin/looptab" ]
++        then
++            /usr/sbin/looptab
++        fi
++
+ 	ZFS_CMD="${ZPOOL} import -N ${ZPOOL_FORCE} ${ZPOOL_IMPORT_OPTS}"
+ 	ZFS_STDERR="$($ZFS_CMD "$pool" 2>&1)"
+ 	ZFS_ERROR="$?"
+
+```
+
 
 ## (Re)generate Pool Cachefile
 
