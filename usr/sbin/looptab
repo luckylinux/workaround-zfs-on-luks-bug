@@ -7,6 +7,9 @@
 LOSETUP_BIN="losetup"                                                                 # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though
 #LOSETUP_BIN="/usr/src/initramfs-investigation/6.8.0-40-generic/main/usr/bin/losetup" # Testing with uncompressed initramfs
 
+# Define "losetup" Command-Line Options
+LOSETUP_OPTIONS="-b 4096"
+
 # Add new Line
 echo -e "\n"
 
@@ -97,10 +100,10 @@ do
         if [ $setupLoopDevice -eq 1 ]
         then
             # Echo
-            echo "Mount Loop Device - Executing Command: ${LOSETUP_BIN} $loopDevicePath $sourceDevice"
+            echo "Mount Loop Device - Executing Command: ${LOSETUP_BIN} ${LOSETUP_OPTIONS} $loopDevicePath $sourceDevice"
 
             # Mount Source Device to Loop Device
-            losetup $loopDevicePath $sourceDevice
+            losetup ${LOSETUP_OPTIONS} $loopDevicePath $sourceDevice
         fi
 
         # Check if Symlink already exists - If it already exists, delete the old Symlink
