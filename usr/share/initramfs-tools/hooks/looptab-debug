@@ -24,6 +24,9 @@ copy_exec "/usr/bin/nc" "/usr/bin/nc-full"
 # Copy lsblk Executable
 copy_exec "/usr/bin/lsblk"
 
+# Copy zsb Executable
+copy_exec "/usr/sbin/zdb"
+
 # Copy looptab-debug Script
 copy_exec "/usr/sbin/looptab-debug"
 

@@ -81,9 +81,25 @@ ls -l /dev/loop/* | ${NC_BIN} ${NC_OPTIONS}
 echo "Get zpool status Output" | ${NC_BIN} ${NC_OPTIONS}
 zpool status -v | ${NC_BIN} ${NC_OPTIONS}
 
+# Get Output of zfs version
+echo "Get zfs version Output" | ${NC_BIN} ${NC_OPTIONS}
+zfs version | ${NC_BIN} ${NC_OPTIONS}
+
+# Get Output of zdb -C
+echo "Get zdb -C Output" | ${NC_BIN} ${NC_OPTIONS}
+zdb -C | ${NC_BIN} ${NC_OPTIONS}
+
 # Get Outout of zpool get path rpool all-vdevs
 echo "Get zpool get path rpool all-vdevs Output" | ${NC_BIN} ${NC_OPTIONS}
 zpool get path rpool all-vdevs | ${NC_BIN} ${NC_OPTIONS}
+
+# Get Outout of zpool get all rpool
+echo "Get zpool get all rpool Output" | ${NC_BIN} ${NC_OPTIONS}
+zpool get all rpool | ${NC_BIN} ${NC_OPTIONS}
+
+# Get Outout of zpool get all rpool all-vdevs
+echo "Get zpool get all rpool all-vdevs Output" | ${NC_BIN} ${NC_OPTIONS}
+zpool get all rpool all-vdevs | ${NC_BIN} ${NC_OPTIONS}
 
 # Iterate over each Device
 echo "Analysing Loop Device Details" | ${NC_BIN} ${NC_OPTIONS}
