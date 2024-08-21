@@ -18,8 +18,11 @@ esac
 
 # Begin real processing below this line
 
-# Copy Netcat Executable
-copy_exec "/usr/bin/nc"
+# Copy nc Executable
+copy_exec "/usr/bin/nc" "/usr/bin/nc-full"
+
+# Copy lsblk Executable
+copy_exec "/usr/bin/lsblk"
 
 # Copy looptab-debug Script
 copy_exec "/usr/sbin/looptab-debug"
