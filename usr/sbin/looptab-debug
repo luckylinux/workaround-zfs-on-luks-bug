@@ -87,7 +87,7 @@ do
         echo "Executing Command: ${LOSETUP_BIN} $loopDevicePath" | ${NC_BIN} ${NC_OPTIONS}
 
         # Run Command
-        losetup --verbose $loopDevicePath --list --output NAME,SIZELIMIT,OFFSET,AUTOCLEAR,RO,BACK-FILE,DIO,LOG-SEC,BACK-INO,BACK-MAJ:MIN,MAJ:MIN,PARTSCAN | ${NC_BIN} ${NC_OPTIONS}
+        ${LOSETUP_BIN} --verbose $loopDevicePath --list --output NAME,SIZELIMIT,OFFSET,AUTOCLEAR,RO,BACK-FILE,DIO,LOG-SEC,BACK-INO,BACK-MAJ:MIN,MAJ:MIN,PARTSCAN | ${NC_BIN} ${NC_OPTIONS}
     fi
 done
 
