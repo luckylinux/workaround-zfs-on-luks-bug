@@ -150,8 +150,9 @@ then
 fi
 
 # Force zpool reopen
-zpool reopen
-zpool reopen rpool
+# Disabled for testing on Real Booting System
+#zpool reopen
+#zpool reopen rpool
 
 # Echo
 echo "Ending DEBUG at $TIMESTAMP"  | ${NC_BIN} ${NC_OPTIONS}
