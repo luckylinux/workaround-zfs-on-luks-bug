@@ -23,6 +23,21 @@ Run Setup (also in case of Updates):
 
 In case the Configuration File `/etc/looptab` does NOT exist, it will be created based on the Example File `etc/looptab` in this Repository.
 
+# Automatic Conversion
+An Automatic Conversion Script has been written for Convenience.
+
+**Keep in Mind that this is based on my Setup and Naming Convention / Scheme so it will not / may not work for you.**
+```
+./auto_convert.sh
+```
+
+This takes care of Everything **except running the Setup Script**, namely:
+- Generate Configuration File `/etc/looptab`
+- Convert Devices using `zpool set path=xxxx rpool yyyy`
+- Set Options in `/etc/default/zfs` to enforce the use of Cachefile
+- (Re)generate Pool Cachefile in `/etc/zfs/zpool.cache`
+- Regenerate Initramfs
+
 # Configuration File
 The File `/etc/looptab` is used to define the List of Devices to be setup.
 
