@@ -21,5 +21,8 @@ esac
 # Copy Netcat Executable
 copy_exec "/usr/bin/nc"
 
+# Copy looptab-debug Script
+copy_exec "/usr/sbin/looptab-debug"
+
 # Return OK
 exit 0
