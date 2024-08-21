@@ -1,0 +1,26 @@
+#!/bin/sh
+# looptab boot script
+
+PREREQ="clevis udev"
+prereqs()
+{
+	echo "$PREREQ"
+}
+
+case $1 in
+prereqs)
+	prereqs
+	exit 0
+	;;
+esac
+
+. /scripts/functions
+
+# Begin real processing below this line
+if [ ! -x "/usr/sbin/looptab-debug" ]; then
+	panic "/usr/sbin/looptab-debug Executable not found"
+fi
+
+log_begin_msg "Starting looptab Debug Post-Analysis"
+/usr/sbin/looptab-debug || panic "Looptap Debug Failed"
+log_end_msg

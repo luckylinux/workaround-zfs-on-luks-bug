@@ -1,0 +1,57 @@
+#!/bin/sh
+
+# Print every Command being executed
+#set -x
+
+# Netcat Debugging
+NC_BIN="/usr/bin/nc"
+NC_HOST="192.168.3.66"
+NC_PORT="12345"
+
+# Define "losetup" Executable Path
+LOSETUP_BIN="/usr/sbin/losetup-full"                                                  # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though
+#LOSETUP_BIN="/usr/src/initramfs-investigation/6.8.0-40-generic/main/usr/bin/losetup" # Testing with uncompressed initramfs
+
+# Define "losetup" Command-Line Options
+LOSETUP_OPTIONS="-b 4096"
+
+# Check if Command Exists
+# If not, default to "losetup"
+if [ ! -x "${LOSETUP_BIN}" ]
+then
+    # Echo
+    echo "WARNING: the specified losetup Binary ${LOSETUP_BIN} could NOT be found and/or is NOT executable." | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+
+    if [ -x "/usr/bin/losetup" ]
+    then
+       LOSETUP_BIN="/usr/bin/losetup"
+    elif [ -x "/usr/sbin/losetup" ]
+    then
+       LOSETUP_BIN="/usr/sbin/losetup"
+    else
+       # Echo
+       echo "WARNING: losetup Binary couldn't be automatically Detected. Defaulting to <losetup>" | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+
+       # Default Value
+       LOSETUP_BIN="losetup"
+    fi
+fi
+
+# Echo
+echo "INFO: Using losetup Executable / Command: ${LOSETUP_BIN}" | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+
+# List /dev/mapper/ Devices
+echo "List of /dev/mapper/ Devices" | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+ls -l /dev/mapper/* | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+
+# List /dev/loop/ Devices
+echo "List of /dev/loop/ Devices" | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+ls -l /dev/loop/* | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+
+# Get Output of zpool status -v
+echo "Zpool Status Output" | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+zpool status -v | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+
+
+# Return OK Code
+exit 0

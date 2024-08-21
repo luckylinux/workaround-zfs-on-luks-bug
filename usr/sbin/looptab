@@ -7,6 +7,9 @@
 LOSETUP_BIN="/usr/sbin/losetup-full"                                                  # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though
 #LOSETUP_BIN="/usr/src/initramfs-investigation/6.8.0-40-generic/main/usr/bin/losetup" # Testing with uncompressed initramfs
 
+# Define "losetup" Command-Line Options
+LOSETUP_OPTIONS="-b 4096"
+
 # Check if Command Exists
 # If not, default to "losetup"
 if [ ! -x "${LOSETUP_BIN}" ]
@@ -31,9 +34,6 @@ fi
 
 # Echo
 echo "INFO: Using losetup Executable / Command: ${LOSETUP_BIN}"
-
-# Define "losetup" Command-Line Options
-LOSETUP_OPTIONS="-b 4096"
 
 # Add new Line
 echo -e "\n"
