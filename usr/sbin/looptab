@@ -3,16 +3,34 @@
 # Print every Command being executed
 #set -x
 
-# Define "losetup" Executable
-LOSETUP_BIN="losetup-full"                                                            # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though
+# Define "losetup" Executable Path
+LOSETUP_BIN="/usr/sbin/losetup-full"                                                  # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though
 #LOSETUP_BIN="/usr/src/initramfs-investigation/6.8.0-40-generic/main/usr/bin/losetup" # Testing with uncompressed initramfs
 
 # Check if Command Exists
 # If not, default to "losetup"
 if [ ! -x "${LOSETUP_BIN}" ]
 then
-    LOSETUP_BIN="losetup"
+    # Echo
+    echo "WARNING: the specified losetup Binary ${LOSETUP_BIN} could NOT be found and/or is NOT executable."
+
+    if [ -x "/usr/bin/losetup" ]
+    then
+       LOSETUP_BIN="/usr/bin/losetup"
+    elif [ -x "/usr/sbin/losetup" ]
+    then
+       LOSETUP_BIN="/usr/sbin/losetup"
+    else
+       # Echo
+       echo "WARNING: losetup Binary couldn't be automatically Detected. Defaulting to <losetup>"
+
+       # Default Value
+       LOSETUP_BIN="losetup"
+    fi
 fi
+
+# Echo
+echo "INFO: Using losetup Executable / Command: ${LOSETUP_BIN}"
 
 # Define "losetup" Command-Line Options
 LOSETUP_OPTIONS="-b 4096"
@@ -110,7 +128,7 @@ do
             echo "Mount Loop Device - Executing Command: ${LOSETUP_BIN} ${LOSETUP_OPTIONS} $loopDevicePath $sourceDevice"
 
             # Mount Source Device to Loop Device
-            losetup ${LOSETUP_OPTIONS} $loopDevicePath $sourceDevice
+            ${LOSETUP_BIN} ${LOSETUP_OPTIONS} $loopDevicePath $sourceDevice
         fi
 
         # Check if Symlink already exists - If it already exists, delete the old Symlink
