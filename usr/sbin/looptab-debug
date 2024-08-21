@@ -56,9 +56,12 @@ echo "List of /dev/loop/ Devices" | ${NC_BIN} ${NC_OPTIONS}
 ls -l /dev/loop/* | ${NC_BIN} ${NC_OPTIONS}
 
 # Get Output of zpool status -v
-echo "Zpool Status Output" | ${NC_BIN} ${NC_OPTIONS}
+echo "Get zpool status Output" | ${NC_BIN} ${NC_OPTIONS}
 zpool status -v | ${NC_BIN} ${NC_OPTIONS}
 
+# Get Outout of zpool get path rpool all-vdevs
+echo "Get zpool get path rpool all-vdevs Output" | ${NC_BIN} ${NC_OPTIONS}
+zpool get path rpool all-vdevs | ${NC_BIN} ${NC_OPTIONS}
 
 # Iterate over each Device
 echo "Analysing Loop Device Details" | ${NC_BIN} ${NC_OPTIONS}
@@ -95,6 +98,22 @@ dmsetup table | ${NC_BIN} ${NC_OPTIONS}
 # Get lsblk Output
 echo "Analysing lsblk Ouput" | ${NC_BIN} ${NC_OPTIONS}
 lsblk --all --bytes -to +START,SIZE,TYPE --output NAME,ALIGNMENT,MIN-IO,OPT-IO,PHY-SEC,LOG-SEC,ROTA,SCHED,RQ-SIZE,RA,WSAME,START,SIZE,TYPE,MAJ:MIN | ${NC_BIN} ${NC_OPTIONS}
+
+# Send Contents of /run/initramfs/initramfs.debug to Remote Netcat Server
+if [ -f "/run/initramfs/initramfs.debug" ]
+then
+   cat "/run/initramfs/initramfs.debug" | ${NC_BIN} ${NC_OPTIONS}
+fi
+
+# Copy /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$timestamp
+if [ -f "/run/initramfs/initramfs.debug" ]
+then
+   cp "/run/initramfs/initramfs.debug" "/var/log/initramfs.debug.$TIMESTAMP"
+fi
+
+# Force zpool reopen
+zpool reopen
+zpool reopen rpool
 
 # Echo
 echo "Ending DEBUG at $TIMESTAMP"  | ${NC_BIN} ${NC_OPTIONS}
