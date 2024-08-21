@@ -16,6 +16,12 @@ LOSETUP_BIN="/usr/sbin/losetup-full"                                            
 # Define "losetup" Command-Line Options
 LOSETUP_OPTIONS="-b 4096"
 
+# Timestamp
+TIMESTAMP=`date +"%Y%m%d-%H%M%S"`
+
+# Echo
+echo "Starting DEBUG at $TIMESTAMP"  | ${NC_BIN} ${NC_OPTIONS}
+
 # Check if Command Exists
 # If not, default to "losetup"
 if [ ! -x "${LOSETUP_BIN}" ]
@@ -42,16 +48,19 @@ fi
 echo "INFO: Using losetup Executable / Command: ${LOSETUP_BIN}" | ${NC_BIN} ${NC_OPTIONS}
 
 # List /dev/mapper/ Devices
-echo "List of /dev/mapper/ Devices" | ${NC_OPTIONS}
-ls -l /dev/mapper/* | ${NC_OPTIONS}
+echo "List of /dev/mapper/ Devices" | ${NC_BIN} ${NC_OPTIONS}
+ls -l /dev/mapper/* | ${NC_BIN} ${NC_OPTIONS}
 
 # List /dev/loop/ Devices
-echo "List of /dev/loop/ Devices" | ${NC_OPTIONS}
-ls -l /dev/loop/* | ${NC_OPTIONS}
+echo "List of /dev/loop/ Devices" | ${NC_BIN} ${NC_OPTIONS}
+ls -l /dev/loop/* | ${NC_BIN} ${NC_OPTIONS}
 
 # Get Output of zpool status -v
-echo "Zpool Status Output" | ${NC_OPTIONS}
-zpool status -v | ${NC_OPTIONS}
+echo "Zpool Status Output" | ${NC_BIN} ${NC_OPTIONS}
+zpool status -v | ${NC_BIN} ${NC_OPTIONS}
+
+# Echo
+echo "Ending DEBUG at $TIMESTAMP"  | ${NC_BIN} ${NC_OPTIONS}
 
 
 # Return OK Code
