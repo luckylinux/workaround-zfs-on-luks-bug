@@ -25,8 +25,11 @@ fi
 # Copy Configuration File
 copy_file config "/etc/looptab"
 
-# Copy Binary
+# Copy looptab Binary
 copy_exec "/usr/sbin/looptab"
+
+# Copy the "full" losetup Binary
+copy_exec "/usr/sbin/losetup" "/usr/sbin/losetup-full"
 
 # Return OK
 exit 0
