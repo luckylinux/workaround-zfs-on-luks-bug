@@ -253,6 +253,11 @@ systemctl stop firewalld
 
 Start Netcat Server (Debian Package `netcat-openbsd`):
 ```
+nc -v -l -k -p 12345 >> file.nc
+```
+
+Less Reliable Method - This might however lead to loss of several Lines/Messages:
+```
 while true; do nc -v -l -p 12345 >> file.nc ;done;
 ```
 
