@@ -92,6 +92,10 @@ do
     fi
 done
 
+# Force ZFS to use the newly configured path
+zpool reopen
+zpool reopen rpool
+
 # Configure /etc/default/zfs automatically
 sed -Ei "s|^ZPOOL_IMPORT_OPTS=\"\"|#ZPOOL_IMPORT_OPTS=\"\"|" /etc/default/zfs
 sed -Ei "s|^#ZPOOL_IMPORT_OPTS=\"-c /etc/zfs/zpool.cache\"|ZPOOL_IMPORT_OPTS=\"-c /etc/zfs/zpool.cache\"|" /etc/default/zfs
