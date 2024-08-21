@@ -244,8 +244,26 @@ Get the Current Path:
 zpool get path rpool ata-CT1000MX500SSD1_2301E6992CB7_crypt
 ```
 
+# Troubleshooting Boot Issues
+## Netcat Server Setup
+Make sure `firewalld` Systemd Service is stopped:
+```
+systemctl stop firewalld
+```
 
-# Replace Drives and Fix Path (Second Attempt - Device Paths were changed back to devid since the Loop Device couldn't be found)
+Start Netcat Server (Debian Package `netcat-openbsd`):
+```
+while true; do nc -v -l -p 12345 >> file.nc ;done;
+```
+
+## Netcat Client Setup
+With Debian Package `netcat-openbsd` the following set of Options work as it's supposed to be:
+```
+echo "xxxx" | nc -N -n -v 192.168.3.66 12345
+```
+
+# Old Stuff
+Replace Drives and Fix Path (Second Attempt - Device Paths were changed back to devid since the Loop Device couldn't be found)
 
 ```
 zpool set path=/dev/loop/ata-CT1000MX500SSD1_2301E6992CB7_loop rpool dm-uuid-CRYPT-LUKS2-b5ed1ef4aecb4404b68229f2a8a253c3-ata-CT1000MX500SSD1_2301E6992CB7_crypt

@@ -7,6 +7,7 @@
 NC_BIN="/usr/bin/nc"
 NC_HOST="192.168.3.66"
 NC_PORT="12345"
+NC_OPTIONS="-N -n -v ${NC_HOST} ${NC_PORT}"
 
 # Define "losetup" Executable Path
 LOSETUP_BIN="/usr/sbin/losetup-full"                                                  # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though
@@ -20,7 +21,7 @@ LOSETUP_OPTIONS="-b 4096"
 if [ ! -x "${LOSETUP_BIN}" ]
 then
     # Echo
-    echo "WARNING: the specified losetup Binary ${LOSETUP_BIN} could NOT be found and/or is NOT executable." | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+    echo "WARNING: the specified losetup Binary ${LOSETUP_BIN} could NOT be found and/or is NOT executable." | ${NC_BIN} ${NC_OPTIONS}
 
     if [ -x "/usr/bin/losetup" ]
     then
@@ -30,7 +31,7 @@ then
        LOSETUP_BIN="/usr/sbin/losetup"
     else
        # Echo
-       echo "WARNING: losetup Binary couldn't be automatically Detected. Defaulting to <losetup>" | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+       echo "WARNING: losetup Binary couldn't be automatically Detected. Defaulting to <losetup>" | ${NC_BIN} ${NC_OPTIONS}
 
        # Default Value
        LOSETUP_BIN="losetup"
@@ -38,19 +39,19 @@ then
 fi
 
 # Echo
-echo "INFO: Using losetup Executable / Command: ${LOSETUP_BIN}" | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+echo "INFO: Using losetup Executable / Command: ${LOSETUP_BIN}" | ${NC_BIN} ${NC_OPTIONS}
 
 # List /dev/mapper/ Devices
-echo "List of /dev/mapper/ Devices" | ${NC_BIN} ${NC_HOST} ${NC_PORT}
-ls -l /dev/mapper/* | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+echo "List of /dev/mapper/ Devices" | ${NC_OPTIONS}
+ls -l /dev/mapper/* | ${NC_OPTIONS}
 
 # List /dev/loop/ Devices
-echo "List of /dev/loop/ Devices" | ${NC_BIN} ${NC_HOST} ${NC_PORT}
-ls -l /dev/loop/* | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+echo "List of /dev/loop/ Devices" | ${NC_OPTIONS}
+ls -l /dev/loop/* | ${NC_OPTIONS}
 
 # Get Output of zpool status -v
-echo "Zpool Status Output" | ${NC_BIN} ${NC_HOST} ${NC_PORT}
-zpool status -v | ${NC_BIN} ${NC_HOST} ${NC_PORT}
+echo "Zpool Status Output" | ${NC_OPTIONS}
+zpool status -v | ${NC_OPTIONS}
 
 
 # Return OK Code
