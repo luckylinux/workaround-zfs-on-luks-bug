@@ -89,11 +89,11 @@ do
 done
 
 # Get dmsetup table Output
-echo "Analysing dmsetup Table Ouput"
+echo "Analysing dmsetup Table Ouput" | ${NC_BIN} ${NC_OPTIONS}
 dmsetup table | ${NC_BIN} ${NC_OPTIONS}
 
 # Get lsblk Output
-echo "Analysing lsblk Ouput"
+echo "Analysing lsblk Ouput" | ${NC_BIN} ${NC_OPTIONS}
 lsblk --all --bytes -to +START,SIZE,TYPE --output NAME,ALIGNMENT,MIN-IO,OPT-IO,PHY-SEC,LOG-SEC,ROTA,SCHED,RQ-SIZE,RA,WSAME,START,SIZE,TYPE,MAJ:MIN | ${NC_BIN} ${NC_OPTIONS}
 
 # Echo
