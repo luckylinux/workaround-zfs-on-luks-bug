@@ -127,6 +127,20 @@ Set New Path for the Second Disk:
 zpool set path=/dev/loop/ata-CT1000MX500SSD1_2302E69AD9D0_loop rpool ata-CT1000MX500SSD1_2302E69AD9D0_crypt
 ```
 
+## Force ZFS to start using the new Devices
+This is probably a BUG. See [BUG Report](https://github.com/openzfs/zfs/issues/16465).
+
+In order for ZFS to **ACTUALLY** start using the newly introduced loop Devices, it is/might be (in all/some Circumstances) required to issue:
+```
+zpool reopen
+```
+
+and/or:
+
+```
+zpool reopen rpool
+```
+
 ## (Optional) Run Scrub after changing Paths
 (Optional) Run a Scrub after Changing Path(s):
 ```
