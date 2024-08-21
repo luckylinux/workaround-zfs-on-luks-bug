@@ -65,13 +65,13 @@ echo "Analysing Loop Device Details" | ${NC_BIN} ${NC_OPTIONS}
 cat /etc/looptab | grep -vE "^#" | while IFS= read -r line;
 do
     # Extract "ID"
-    loopDeviceNumber=`echo "$line" | cut -f1 -d'        '`
+    loopDeviceNumber=`echo "$line" | cut -f1 -d'	'`
 
     # Extract "Source" Device
-    sourceDevice=`echo "$line" | cut -f2 -d'    '`
+    sourceDevice=`echo "$line" | cut -f2 -d'	'`
 
     # Extract "Loop" Device with Custom Name
-    loopDeviceCustomName=`echo "$line" | cut -f3 -d'    '`
+    loopDeviceCustomName=`echo "$line" | cut -f3 -d'	'`
 
     # Build "Standardized" Device Path
     loopDevicePath="/dev/loop$loopDeviceNumber"
