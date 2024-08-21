@@ -59,9 +59,45 @@ ls -l /dev/loop/* | ${NC_BIN} ${NC_OPTIONS}
 echo "Zpool Status Output" | ${NC_BIN} ${NC_OPTIONS}
 zpool status -v | ${NC_BIN} ${NC_OPTIONS}
 
+
+# Iterate over each Device
+echo "Analysing Loop Device Details" | ${NC_BIN} ${NC_OPTIONS}
+cat /etc/looptab | grep -vE "^#" | while IFS= read -r line;
+do
+    # Extract "ID"
+    loopDeviceNumber=`echo "$line" | cut -f1 -d'        '`
+
+    # Extract "Source" Device
+    sourceDevice=`echo "$line" | cut -f2 -d'    '`
+
+    # Extract "Loop" Device with Custom Name
+    loopDeviceCustomName=`echo "$line" | cut -f3 -d'    '`
+
+    # Build "Standardized" Device Path
+    loopDevicePath="/dev/loop$loopDeviceNumber"
+
+    # Check if Device Exists
+    if [ -b $loopDevicePath ]
+    then
+        # Echo
+        echo "Check Loop Device Information for $loopDevicePath"| ${NC_BIN} ${NC_OPTIONS}
+        echo "Executing Command: ${LOSETUP_BIN} $loopDevicePath" | ${NC_BIN} ${NC_OPTIONS}
+
+        # Run Command
+        losetup --verbose $loopDevicePath --list --output NAME,SIZELIMIT,OFFSET,AUTOCLEAR,RO,BACK-FILE,DIO,LOG-SEC,BACK-INO,BACK-MAJ:MIN,MAJ:MIN,PARTSCAN | ${NC_BIN} ${NC_OPTIONS}
+    fi
+done
+
+# Get dmsetup table Output
+echo "Analysing dmsetup Table Ouput"
+dmsetup table | ${NC_BIN} ${NC_OPTIONS}
+
+# Get lsblk Output
+echo "Analysing lsblk Ouput"
+lsblk --all --bytes -to +START,SIZE,TYPE --output NAME,ALIGNMENT,MIN-IO,OPT-IO,PHY-SEC,LOG-SEC,ROTA,SCHED,RQ-SIZE,RA,WSAME,START,SIZE,TYPE,MAJ:MIN | ${NC_BIN} ${NC_OPTIONS}
+
 # Echo
 echo "Ending DEBUG at $TIMESTAMP"  | ${NC_BIN} ${NC_OPTIONS}
-
 
 # Return OK Code
 exit 0
