@@ -54,7 +54,13 @@ do
            # Build LOOP Device Name
            loopDeviceName=`echo $value | sed -E "s|^(/dev/mapper/)?([0-9a-zA-Z_-]+)_crypt$|\2_loop|"`
 
-           # If the name contains something like "dm-uuid-CRYPT-LUKS2-ac03ed5e9cdf491aac236204501f6bec-" prior to the REAL name of the LUKS Device Name matching in /etc/crypttab, then remove that part
+           # In some cases /dev/disk/by-id is also prefixed - remove it as well
+           loopDeviceName=`echo $loopDeviceName | sed -E "s|^(/dev/disk/by-id/)?([0-9a-zA-Z_-]+)|\2|"`
+
+           # If Device Name still ends with _crypt, replace it with _loop
+           loopDeviceName=`echo $loopDeviceName | sed -E "s|^([0-9a-zA-Z_-]+)_(crypt)?$|\1_loop|"`
+
+           # If the name contains something like "dm-uuid-CRYPT-LUKS2-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-" prior to the REAL name of the LUKS Device Name matching in /etc/crypttab, then remove that part
            # That usually indicates a previous Attempt to use the /dev/loop/xxx Device which unfortunately "zpool import" couldn't find
            loopDeviceName=`echo $loopDeviceName | sed -E "s|^(dm-uuid-CRYPT-LUKS[1-2]-[0-9a-fA-F]+-)?([0-9a-zA-Z_-]+)|\2|"`
 
