@@ -42,5 +42,12 @@ copy_exec "/usr/bin/dmesg"
 # Copy looptab-debug Script
 copy_exec "/usr/sbin/looptab-debug"
 
+# Copy /etc/netcat if it exists
+if [ -f "/etc/netcat" ]
+then
+    # Copy Configuration File
+    copy_file config "/etc/netcat"
+fi
+
 # Return OK
 exit 0

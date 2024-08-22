@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Optional Argument:
+# - $1: "Source" (not parsed, e.g. "Initramgs" , "/etc/rc.local", ...)
+# - $2: "Message" (not parsed)
+sourceValue="${1-unspecified}"
+messageValue="${2-unspecified}"
+
 # Print every Command being executed
 set -x
 
@@ -18,11 +24,26 @@ fi
 IOSTAT_INTERVAL="1"
 IOSTAT_COUNT=500
 
-# Netcat Debugging
-NC_BIN="/usr/bin/nc-full"
-NC_HOST="192.168.3.66"
-NC_PORT="12345"
-NC_OPTIONS="-N -n -v ${NC_HOST} ${NC_PORT}"
+# Echo
+echo "Executing $0 from Source=$sourceValue (Message: $messageValue)"
+
+# Netcat Configuration
+# Load from File if it exists
+if [ -f "/etc/netcat" ]
+then
+   # Load Configuration (it's a Shell Script)
+   echo "Loading netcat Configuration from /etc/netcat"
+   . /etc/netcat
+else
+   # Echo
+   echo "Using hardcoded netcat Configuration Values"
+
+   # Hardcoded Fallback Configuration
+   NC_BIN="/usr/bin/nc-full"
+   NC_HOST="192.168.3.66"
+   NC_PORT="12345"
+   NC_OPTIONS="-N -n -v ${NC_HOST} ${NC_PORT}"
+fi
 
 # Check if Command Exists
 # If not, default to "nc"
@@ -46,8 +67,11 @@ then
     fi
 fi
 
+# Echo again to Netcat this Time
+echo "Executing $0 from Source=$sourceValue (Message: $messageValue)" | ${NC_BIN} ${NC_OPTIONS}
+
 # Echo
-echo "Saving Logs to LOG_BASEFOLDER = ${LOG_BASEFOLDER}"  | ${NC_BIN} ${NC_OPTIONS}
+echo "Saving Logs to LOG_BASEFOLDER = ${LOG_BASEFOLDER}" | ${NC_BIN} ${NC_OPTIONS}
 
 # Define "losetup" Executable Path
 LOSETUP_BIN="/usr/sbin/losetup-full"                                                  # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though

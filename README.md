@@ -272,6 +272,23 @@ With Debian Package `netcat-openbsd` the following set of Options work as it's s
 echo "xxxx" | nc -N -n -v 192.168.3.66 12345
 ```
 
+## Netcat Setup on the Machine to be Troubleshooted
+The Netcat Configuration can be specified in `/etc/netcat`:
+```
+#!/bin/sh  
+
+# Enable Verbose Output
+set -x
+
+# Netcat Debugging Configuration
+NC_BIN="/usr/bin/nc-full"
+NC_HOST="192.168.3.66"
+NC_PORT="12345"
+NC_OPTIONS="-N -n -v ${NC_HOST} ${NC_PORT}"
+```
+
+This will automatically be loaded by the `looptab-debug` Script (either in Initramfs/Chroot/Live System/etc).
+
 ## Disable clevis killing Networking
 In order for the Client to be able to send Data to the Remote Netcat Server, it's essential to leave the Networking Up.
 
@@ -345,6 +362,9 @@ if [ -f "/run/initramfs/iostat.debug" ]
 then
    cp "/run/initramfs/iostat.debug" "/var/log/iostat.debug.$TIMESTAMP"
 fi
+
+# Execute the "full" looptab-debug on the Live System
+/usr/sbin/looptab-debug "/etc/rc.local" "Live System just afer Boot"
 
 # Force zpool reopen
 #zpool reopen

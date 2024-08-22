@@ -22,5 +22,5 @@ if [ ! -x "/usr/sbin/looptab-debug" ]; then
 fi
 
 log_begin_msg "Starting looptab Debug Post-Analysis"
-/usr/sbin/looptab-debug || panic "Looptap Debug Failed"
+/usr/sbin/looptab-debug "initramfs" "local-bottom Subsection" || panic "Looptap Debug Failed"
 log_end_msg
