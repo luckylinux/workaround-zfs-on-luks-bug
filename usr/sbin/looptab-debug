@@ -229,5 +229,13 @@ then
    cp "/run/initramfs/initramfs.debug" "/var/log/initramfs.debug.$TIMESTAMP"
 fi
 
+# Send Contents of dmesg to Remote Netcat Server
+echo "Sending dmesg to Remote Netcat Server" | ${NC_BIN} ${NC_OPTIONS}
+dmesg | ${NC_BIN} ${NC_OPTIONS}
+
+# Dump dmesg to /var/log/dmesg.debug.$timestamp
+echo "Dumping dmesg to /var/log/dmesg.debug.$TIMESTAMP"
+dmesg > "/var/log/dmesg.debug.$TIMESTAMP" 2>&1
+
 # Return OK Code
 exit 0
