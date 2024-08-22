@@ -60,14 +60,14 @@ send_iostat_to_netcat() {
 
         # Echo
         echo "Start Sending /var/log/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | ${NC_BIN} ${NC_OPTIONS}
-        echo "==============================================================================" | ${NC_BIN} ${NC_OPTIONS}
+        echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
         # Send Data
         cat /var/log/iostat.debug.$TIMESTAMP | ${NC_BIN} ${NC_OPTIONS}
 
         # Echo
         echo "Finished Sending /var/log/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | ${NC_BIN} ${NC_OPTIONS}
-        echo "==============================================================================" | ${NC_BIN} ${NC_OPTIONS}
+        echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
         # Wait
         sleep ${IOSTAT_INTERVAL}
@@ -81,6 +81,9 @@ send_iostat_to_netcat() {
 }
 
 # Echo
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 echo "Starting DEBUG at $TIMESTAMP"  | ${NC_BIN} ${NC_OPTIONS}
 
 # Check if Command Exists
@@ -110,39 +113,57 @@ echo "INFO: Using losetup Executable / Command: ${LOSETUP_BIN}" | ${NC_BIN} ${NC
 
 # List /dev/mapper/ Devices
 echo "List of /dev/mapper/ Devices" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 ls -l /dev/mapper/* | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # List /dev/loop/ Devices
 echo "List of /dev/loop/ Devices" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 ls -l /dev/loop/* | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Get Output of zpool status -v
 echo "Get zpool status Output" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 zpool status -v | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Get Output of zfs version
 echo "Get zfs version Output" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 zfs version | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Get Kernel Version
 echo "Get Kernel version Output" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 uname -a | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Get Output of zdb -C
 echo "Get zdb -C Output" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 zdb -C | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Get Outout of zpool get path rpool all-vdevs
 echo "Get zpool get path rpool all-vdevs Output" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 zpool get path rpool all-vdevs | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Get Outout of zpool get all rpool
 echo "Get zpool get all rpool Output" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 zpool get all rpool | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Get Outout of zpool get all rpool all-vdevs
 echo "Get zpool get all rpool all-vdevs Output" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 zpool get all rpool all-vdevs | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Iterate over each Device
 echo "Analysing Loop Device Details" | ${NC_BIN} ${NC_OPTIONS}
@@ -170,9 +191,12 @@ do
         # Echo
         echo "Check Loop Device Information for $loopDevicePath"| ${NC_BIN} ${NC_OPTIONS}
         echo "Executing Command: ${LOSETUP_BIN} $loopDevicePath" | ${NC_BIN} ${NC_OPTIONS}
+        echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
         # Run Command
         ${LOSETUP_BIN} --verbose $loopDevicePath --list --output NAME,SIZELIMIT,OFFSET,AUTOCLEAR,RO,BACK-FILE,DIO,LOG-SEC,BACK-INO,BACK-MAJ:MIN,MAJ:MIN,PARTSCAN | ${NC_BIN} ${NC_OPTIONS}
+
+        echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
         # Add to List for iostat Processing later on
         loopDevicesList="${loopDevicesList} ${loopDeviceCustomName}"
@@ -187,22 +211,29 @@ done
 
 # Get dmsetup table Output
 echo "Analysing dmsetup Table Ouput" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 dmsetup table | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Get lsblk Output
 echo "Analysing lsblk Ouput" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 lsblk --all --bytes -to +START,SIZE,TYPE --output NAME,ALIGNMENT,MIN-IO,OPT-IO,PHY-SEC,LOG-SEC,ROTA,SCHED,RQ-SIZE,RA,WSAME,START,SIZE,TYPE,MAJ:MIN | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Get a "one-off" iostat Output
 echo "Analysing iostat Ouput (one-off)" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
 iostat -dk -zyx $@ ${IOSTAT_INTERVAL} 1 | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Launch "iostat" in the Background and save to File
 echo "Launching iostat in the Background and saving Results to /var/log/iostat.debug.$TIMESTAMP"
 touch /var/log/iostat.debug.$TIMESTAMP
 set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
 iostat -dk -zyx $@ ${IOSTAT_INTERVAL} ${IOSTAT_COUNT} > /var/log/iostat.debug.$TIMESTAMP &
+
 
 # Then try to periodically send via Netcat
 send_iostat_to_netcat &
@@ -214,12 +245,17 @@ send_iostat_to_netcat &
 
 # Echo
 echo "Ending DEBUG at $TIMESTAMP"  | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Send Contents of /run/initramfs/initramfs.debug to Remote Netcat Server
 if [ -f "/run/initramfs/initramfs.debug" ]
 then
    echo "Sending /run/initramfs/initramfs.debug to Remote Netcat Server" | ${NC_BIN} ${NC_OPTIONS}
+   echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
    cat "/run/initramfs/initramfs.debug" | ${NC_BIN} ${NC_OPTIONS}
+   echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 fi
 
 # Copy /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$timestamp
@@ -231,7 +267,9 @@ fi
 
 # Send Contents of dmesg to Remote Netcat Server
 echo "Sending dmesg to Remote Netcat Server" | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 dmesg | ${NC_BIN} ${NC_OPTIONS}
+echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Dump dmesg to /var/log/dmesg.debug.$timestamp
 echo "Dumping dmesg to /var/log/dmesg.debug.$TIMESTAMP"
