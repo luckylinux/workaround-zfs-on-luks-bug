@@ -250,6 +250,18 @@ zpool get path rpool ata-CT1000MX500SSD1_2301E6992CB7_crypt
 ```
 
 # Troubleshooting Boot Issues
+## Enable Debugging
+In `/etc/default/grub.d/debug.cfg` set:
+```
+GRUB_CMDLINE_LINUX="${GRUB_CMDLINE_LINUX} debug"
+GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT} debug"
+```
+
+On Debian/Ubuntu/etc Systems, run:
+```
+update-grub
+```
+
 ## Netcat Server Setup
 Make sure `firewalld` Systemd Service is stopped:
 ```

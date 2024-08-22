@@ -22,21 +22,26 @@ fi
 
 # IOStat Debugging
 IOSTAT_INTERVAL="1"
-IOSTAT_COUNT=500
+IOSTAT_COUNT=60
+
+# Custom Commands
+ECHO_CMD="/usr/bin/echo"
+PRINTF_CMD="/usr/bin/printf"
+CAT_CMD="/usr/bin/cat"
 
 # Echo
-echo "Executing $0 from Source=$sourceValue (Message: $messageValue)"
+${ECHO_CMD} "Executing $0 from Source=$sourceValue (Message: $messageValue)"
 
 # Netcat Configuration
 # Load from File if it exists
 if [ -f "/etc/netcat" ]
 then
    # Load Configuration (it's a Shell Script)
-   echo "Loading netcat Configuration from /etc/netcat"
+   ${ECHO_CMD} "Loading netcat Configuration from /etc/netcat"
    . /etc/netcat
 else
    # Echo
-   echo "Using hardcoded netcat Configuration Values"
+   ${ECHO_CMD} "Using hardcoded netcat Configuration Values"
 
    # Hardcoded Fallback Configuration
    NC_BIN="/usr/bin/nc-full"
@@ -50,7 +55,7 @@ fi
 if [ ! -x "${NC_BIN}" ]
 then
     # Echo
-    echo "WARNING: the specified nc Binary ${NC_BIN} could NOT be found and/or is NOT executable."
+    ${ECHO_CMD} "WARNING: the specified nc Binary ${NC_BIN} could NOT be found and/or is NOT executable."
 
     if [ -x "/usr/bin/nc" ]
     then
@@ -60,7 +65,7 @@ then
        NC_BIN="/usr/sbin/nc"
     else
        # Echo
-       echo "WARNING: nc Binary couldn't be automatically Detected. Defaulting to <nc>"
+       ${ECHO_CMD} "WARNING: nc Binary couldn't be automatically Detected. Defaulting to <nc>"
 
        # Default Value
        NC_BIN="nc"
@@ -69,18 +74,27 @@ fi
 
 # Custom Pipe Function to do both echo/cat AND piping to netcat
 log_data() {
-    # Read data into a local variable
-    #local
-
     # Just get stdin, pass it to tee and print it to the Console, then feed it to Netcat
-    cat /dev/stdin | tee /dev/tty | ${NC_BIN} ${NC_OPTIONS}
+    cat /dev/stdin | tee /dev/tty0 | ${NC_BIN} ${NC_OPTIONS}
+
+    # Read data into a local variable
+    #local ldata=`cat`
+
+    # First echo the Content to stdout
+    #${ECHO_CMD} -e "$ldata"
+
+    # Then do a Pipe to Netcat
+    #${ECHO_CMD} -e "$ldata" | ${NC_BIN} ${NC_OPTIONS}
+
+    # Return Gracefully
+    return 0
 }
 
 # Echo again to Netcat this Time
-echo "Executing $0 from Source=$sourceValue (Message: $messageValue)" | log_data
+${ECHO_CMD} "Executing $0 from Source=$sourceValue (Message: $messageValue)" | log_data
 
 # Echo
-echo "Saving Logs to LOG_BASEFOLDER = ${LOG_BASEFOLDER}" log_data
+${ECHO_CMD} "Saving Logs to LOG_BASEFOLDER = ${LOG_BASEFOLDER}" log_data
 
 # Define "losetup" Executable Path
 LOSETUP_BIN="/usr/sbin/losetup-full"                                                  # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though
@@ -106,15 +120,15 @@ send_iostat_to_netcat() {
         currentTimestamp=`date +"%Y%m%d_%H%M%S"`
 
         # Echo
-        echo "Start Sending ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | log_data
-        echo "============================================================================================================================================================" | log_data
+        ${ECHO_CMD} "Start Sending ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | log_data
+        ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
         # Send Data
-        cat ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP | log_data
+        ${CAT_CMD} ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP | log_data
 
         # Echo
-        echo "Finished Sending ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | log_data
-        echo "============================================================================================================================================================" | log_data
+        ${ECHO_CMD} "Finished Sending ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | log_data
+        ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
         # Wait
         sleep ${IOSTAT_INTERVAL}
@@ -129,17 +143,17 @@ send_iostat_to_netcat() {
 
 
 # Echo
-echo "============================================================================================================================================================" | log_data
-echo "============================================================================================================================================================" | log_data
-echo "============================================================================================================================================================" | log_data
-echo "Starting DEBUG at $TIMESTAMP"  | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Starting DEBUG at $TIMESTAMP"  | log_data
 
 # Check if Command Exists
 # If not, default to "losetup"
 if [ ! -x "${LOSETUP_BIN}" ]
 then
     # Echo
-    echo "WARNING: the specified losetup Binary ${LOSETUP_BIN} could NOT be found and/or is NOT executable." | log_data
+    ${ECHO_CMD} "WARNING: the specified losetup Binary ${LOSETUP_BIN} could NOT be found and/or is NOT executable." | log_data
 
     if [ -x "/usr/bin/losetup" ]
     then
@@ -149,7 +163,7 @@ then
        LOSETUP_BIN="/usr/sbin/losetup"
     else
        # Echo
-       echo "WARNING: losetup Binary couldn't be automatically Detected. Defaulting to <losetup>" | log_data
+       ${ECHO_CMD} "WARNING: losetup Binary couldn't be automatically Detected. Defaulting to <losetup>" | log_data
 
        # Default Value
        LOSETUP_BIN="losetup"
@@ -157,77 +171,77 @@ then
 fi
 
 # Debug Shell
-echo "Shell Information" | log_data
-echo "============================================================================================================================================================" | log_data
-echo "SHELL=$SHELL" | log_data
-echo "0=$0"  | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Shell Information" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
+${ECHO_CMD} "SHELL=$SHELL" | log_data
+${ECHO_CMD} "0=$0"  | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Debug Environment
-echo "Environment Information" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Environment Information" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 printenv | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Echo
-echo "INFO: Using losetup Executable / Command: ${LOSETUP_BIN}" | log_data
+${ECHO_CMD} "INFO: Using losetup Executable / Command: ${LOSETUP_BIN}" | log_data
 
 # List /dev/mapper/ Devices
-echo "List of /dev/mapper/ Devices" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "List of /dev/mapper/ Devices" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 ls -l /dev/mapper/* | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # List /dev/loop/ Devices
-echo "List of /dev/loop/ Devices" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "List of /dev/loop/ Devices" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 ls -l /dev/loop/* | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Get Output of zpool status -v
-echo "Get zpool status Output" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Get zpool status Output" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 zpool status -v | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Get Output of zfs version
-echo "Get zfs version Output" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Get zfs version Output" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 zfs version | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Get Kernel Version
-echo "Get Kernel version Output" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Get Kernel version Output" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 uname -a | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Get Output of zdb -C
-echo "Get zdb -C Output" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Get zdb -C Output" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 zdb -C | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Get Outout of zpool get path rpool all-vdevs
-echo "Get zpool get path rpool all-vdevs Output" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Get zpool get path rpool all-vdevs Output" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 zpool get path rpool all-vdevs | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Get Outout of zpool get all rpool
-echo "Get zpool get all rpool Output" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Get zpool get all rpool Output" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 zpool get all rpool | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Get Outout of zpool get all rpool all-vdevs
-echo "Get zpool get all rpool all-vdevs Output" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Get zpool get all rpool all-vdevs Output" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 zpool get all rpool all-vdevs | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Iterate over each Device
-echo "Analysing Loop Device Details" | log_data
+${ECHO_CMD} "Analysing Loop Device Details" | log_data
 #loopDevicesList=""
 #luksDevicesList=""
 #physicalDevicesList=""
@@ -235,7 +249,7 @@ echo "Analysing Loop Device Details" | log_data
 # Initialize Device List
 set -- ""
 
-cat /etc/looptab | grep -vE "^#" | while IFS= read -r line;
+${CAT_CMD} /etc/looptab | grep -vE "^#" | while IFS= read -r line;
 do
     # Extract "ID"
     loopDeviceNumber=`echo "$line" | cut -f1 -d'	'`
@@ -253,14 +267,14 @@ do
     if [ -b $loopDevicePath ]
     then
         # Echo
-        echo "Check Loop Device Information for $loopDevicePath"| log_data
-        echo "Executing Command: ${LOSETUP_BIN} $loopDevicePath" | log_data
-        echo "============================================================================================================================================================" | log_data
+        ${ECHO_CMD} "Check Loop Device Information for $loopDevicePath"| log_data
+        ${ECHO_CMD} "Executing Command: ${LOSETUP_BIN} $loopDevicePath" | log_data
+        ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
         # Run Command
         ${LOSETUP_BIN} --verbose $loopDevicePath --list --output NAME,SIZELIMIT,OFFSET,AUTOCLEAR,RO,BACK-FILE,DIO,LOG-SEC,BACK-INO,BACK-MAJ:MIN,MAJ:MIN,PARTSCAN | log_data
 
-        echo "============================================================================================================================================================" | log_data
+        ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
         # Add to List for iostat Processing later on
         #loopDevicesList="${loopDevicesList} ${loopDeviceCustomName}"
@@ -277,32 +291,32 @@ do
 done
 
 # Get dmsetup table Output
-echo "Analysing dmsetup Table Ouput" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Analysing dmsetup Table Ouput" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 dmsetup table | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Get lsblk Output
-echo "Analysing lsblk Ouput" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Analysing lsblk Ouput" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 lsblk --all --bytes -to +START,SIZE,TYPE --output NAME,ALIGNMENT,MIN-IO,OPT-IO,PHY-SEC,LOG-SEC,ROTA,SCHED,RQ-SIZE,RA,WSAME,START,SIZE,TYPE,MAJ:MIN | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Get a "one-off" iostat Output
-echo "Analysing iostat Ouput (one-off)" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Analysing iostat Ouput (one-off)" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 #set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
 iostat -dk -zyx $@ ${IOSTAT_INTERVAL} 1 | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Launch "iostat" in the Background and save to File
-echo "Launching iostat in the Background and saving Results to ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
+${ECHO_CMD} "Launching iostat in the Background and saving Results to ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
 touch ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP
 #set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
 iostat -dk -zyx $@ ${IOSTAT_INTERVAL} ${IOSTAT_COUNT} > ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP &
 
 # Then try to periodically send via Netcat
-send_iostat_to_netcat &
+#send_iostat_to_netcat &
 
 # Force zpool reopen
 # Disabled for testing on Real Booting System
@@ -310,36 +324,45 @@ send_iostat_to_netcat &
 #zpool reopen rpool
 
 # Echo
-echo "Ending DEBUG at $TIMESTAMP"  | log_data
-echo "============================================================================================================================================================" | log_data
-echo "============================================================================================================================================================" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Ending DEBUG at $TIMESTAMP"  | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Send Contents of /run/initramfs/initramfs.debug to Remote Netcat Server
 if [ -f "/run/initramfs/initramfs.debug" ]
 then
-   echo "Sending /run/initramfs/initramfs.debug to Remote Netcat Server" | log_data
-   echo "============================================================================================================================================================" | log_data
-   cat "/run/initramfs/initramfs.debug" | log_data
-   echo "============================================================================================================================================================" | log_data
+   ${ECHO_CMD} "Sending /run/initramfs/initramfs.debug to Remote Netcat Server" | log_data
+   ${ECHO_CMD} "============================================================================================================================================================" | log_data
+   ${CAT_CMD} "/run/initramfs/initramfs.debug" | log_data
+   ${ECHO_CMD} "============================================================================================================================================================" | log_data
 fi
 
 # Copy /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$TIMESTAMP
 if [ -f "/run/initramfs/initramfs.debug" ]
 then
-   echo "Copying /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$TIMESTAMP" | log_data
+   ${ECHO_CMD} "Copying /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$TIMESTAMP" | log_data
    cp "/run/initramfs/initramfs.debug" "/var/log/initramfs.debug.$TIMESTAMP"
 fi
 
 # Send Contents of dmesg to Remote Netcat Server
-echo "Sending dmesg to Remote Netcat Server" | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "Sending dmesg to Remote Netcat Server" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 dmesg | log_data
-echo "============================================================================================================================================================" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Dump dmesg to ${LOG_BASEFOLDER}/dmesg.debug.$TIMESTAMP
-echo "Dumping dmesg to ${LOG_BASEFOLDER}/dmesg.debug.$TIMESTAMP"
+${ECHO_CMD} "Dumping dmesg to ${LOG_BASEFOLDER}/dmesg.debug.$TIMESTAMP"
 dmesg > "${LOG_BASEFOLDER}/dmesg.debug.$TIMESTAMP" 2>&1
+
+# If Running on a Live System, also send journalctl -xb to Remote Netcat Server
+if [ -x "/usr/bin/journalctl" ]
+then
+    ${ECHO_CMD} "Sending journalctl -xb --no-pager to Remote Netcat Server" | log_data
+    ${ECHO_CMD} "============================================================================================================================================================" | log_data
+    /usr/bin/journalctl -xb --no-pager | log_data
+    ${ECHO_CMD} "============================================================================================================================================================" | log_data
+fi
 
 # Return OK Code
 exit 0
