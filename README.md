@@ -364,7 +364,7 @@ then
 fi
 
 # Execute the "full" looptab-debug on the Live System
-/usr/sbin/looptab-debug "/etc/rc.local" "Live System just afer Boot"
+/usr/sbin/looptab-debug "/etc/rc.local" "Live System just after Boot"
 
 # Force zpool reopen
 #zpool reopen
