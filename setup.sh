@@ -19,6 +19,7 @@ cp -r usr/share/initramfs-tools/scripts/* /usr/share/initramfs-tools/scripts/
 
 # Remove Files in Old Locations
 rm -f /usr/share/initramfs-tools/scripts/local-top/looptab
+rm -f /usr/share/initramfs-tools/scripts/local-bottom/looptab-debug
 
 # Copy Executables
 cp -r usr/sbin/* /usr/sbin/
@@ -28,5 +29,5 @@ chmod +x /usr/sbin/looptab
 chmod +x /usr/share/initramfs-tools/hooks/looptab
 chmod +x /usr/share/initramfs-tools/hooks/looptab-debug
 chmod +x /usr/share/initramfs-tools/scripts/local-premount/looptab
-chmod +x /usr/share/initramfs-tools/scripts/local-bottom/looptab-debug
+chmod +x /usr/share/initramfs-tools/scripts/init-bottom/looptab-debug
 
