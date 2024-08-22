@@ -253,12 +253,12 @@ systemctl stop firewalld
 
 Start Netcat Server (Debian Package `netcat-openbsd`):
 ```
-TIMESTAMP=$(date +"%Y%m%d-%H%M%S"); nc -v -l -k -p 12345 >> file_${TIMESTAMP}.nc
+TIMESTAMP=$(date +"%Y%m%d-%H%M%S"); FILENAME="file_${TIMESTAMP}.nc"; echo "Using Filename: ${FILENAME}; echo ""; nc -v -l -k -p 12345 >> ${FILENAME}
 ```
 
 Less Reliable Method - This might however lead to loss of several Lines/Messages:
 ```
-TIMESTAMP=$(date +"%Y%m%d-%H%M%S"); while true; do nc -v -l -p 12345 >> file_${TIMESTAMP}.nc ;done;
+TIMESTAMP=$(date +"%Y%m%d-%H%M%S"); FILENAME="file_${TIMESTAMP}.nc"; echo "Using Filename: ${FILENAME}; echo ""; while true; do nc -v -l -p 12345 >> ${FILENAME} ;done;
 ```
 
 ## Netcat Client Setup
