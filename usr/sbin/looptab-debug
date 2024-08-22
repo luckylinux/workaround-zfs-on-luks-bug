@@ -3,6 +3,10 @@
 # Print every Command being executed
 set -x
 
+# IOStat Debugging
+IOSTAT_INTERVAL="1"
+IOSTAT_COUNT=500
+
 # Netcat Debugging
 NC_BIN="/usr/bin/nc-full"
 NC_HOST="192.168.3.66"
@@ -49,7 +53,7 @@ send_iostat_to_netcat() {
     # Initialize Variable
     local currentTimestamp=""
 
-    while [ $netcatLoopCounter -lt 100 ]
+    while [ $netcatLoopCounter -lt ${IOSTAT_COUNT} ]
     do
         # Current Time
         currentTimestamp=`date +"%Y%m%d_%H%M%S"`
@@ -66,11 +70,14 @@ send_iostat_to_netcat() {
         echo "==============================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
         # Wait
-        sleep 1
+        sleep ${IOSTAT_INTERVAL}
 
         # Increase Counter
         netcatLoopCounter=$((netcatLoopCounter+1))
     done
+
+    # Exit Gracefully
+    return 0
 }
 
 # Echo
@@ -184,12 +191,14 @@ lsblk --all --bytes -to +START,SIZE,TYPE --output NAME,ALIGNMENT,MIN-IO,OPT-IO,P
 
 # Get a "one-off" iostat Output
 echo "Analysing iostat Ouput (one-off)" | ${NC_BIN} ${NC_OPTIONS}
-iostat -dk -zyx ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList} 1 1 | ${NC_BIN} ${NC_OPTIONS}
+set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
+iostat -dk -zyx $@ ${IOSTAT_INTERVAL} 1 | ${NC_BIN} ${NC_OPTIONS}
 
 # Launch "iostat" in the Background and save to File
 echo "Launching iostat in the Background and saving Results to /var/log/iostat.debug.$TIMESTAMP"
 touch /var/log/iostat.debug.$TIMESTAMP
-iostat -dk -zyx ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList} 0.5 100 > /var/log/iostat.debug.$TIMESTAMP &
+set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
+iostat -dk -zyx $@ ${IOSTAT_INTERVAL} ${IOSTAT_COUNT} > /var/log/iostat.debug.$TIMESTAMP &
 
 # Then try to periodically send via Netcat
 send_iostat_to_netcat &
