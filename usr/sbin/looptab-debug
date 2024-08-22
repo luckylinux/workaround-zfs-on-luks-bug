@@ -41,6 +41,38 @@ LOSETUP_OPTIONS="-b 4096"
 # Timestamp
 TIMESTAMP=`date +"%Y%m%d-%H%M%S"`
 
+# Custom Function
+send_iostat_to_netcat() {
+    # Initialize counter
+    local netcatLoopCounter=0
+
+    # Initialize Variable
+    local currentTimestamp=""
+
+    while [ $netcatLoopCounter -lt 100 ]
+    do
+        # Current Time
+        currentTimestamp=`date +"%Y%m%d_%H%M%S"`
+
+        # Echo
+        echo "Start Sending /var/log/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | ${NC_BIN} ${NC_OPTIONS}
+        echo "==============================================================================" | ${NC_BIN} ${NC_OPTIONS}
+
+        # Send Data
+        cat /var/log/iostat.debug.$TIMESTAMP | ${NC_BIN} ${NC_OPTIONS}
+
+        # Echo
+        echo "Finished Sending /var/log/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | ${NC_BIN} ${NC_OPTIONS}
+        echo "==============================================================================" | ${NC_BIN} ${NC_OPTIONS}
+
+        # Wait
+        sleep 1
+
+        # Increase Counter
+        loopDeviceCounter=$((loopDeviceCounter+1))
+    done
+}
+
 # Echo
 echo "Starting DEBUG at $TIMESTAMP"  | ${NC_BIN} ${NC_OPTIONS}
 
@@ -154,10 +186,13 @@ lsblk --all --bytes -to +START,SIZE,TYPE --output NAME,ALIGNMENT,MIN-IO,OPT-IO,P
 echo "Analysing iostat Ouput (one-off)" | ${NC_BIN} ${NC_OPTIONS}
 iostat -dk -zyx ${physicalDevicesList[*]} ${luksDevicesList[*]} ${loopDevicesList[*]} 1 1 | ${NC_BIN} ${NC_OPTIONS}
 
-# Launch "iostat" in the Background and save to File, then try to periodically send via Netcat
+# Launch "iostat" in the Background and save to File
 echo "Launching iostat in the Background and saving Results to /var/log/iostat.debug.$TIMESTAMP"
 touch /var/log/iostat.debug.$TIMESTAMP
-iostat -dk -zyx ${physicalDevicesList[*]} ${luksDevicesList[*]} ${loopDevicesList[*]} 0.5 100 > /var/log/iostat.debug.$TIMESTAMP & while true; do cat /var/log/iostat.debug.$TIMESTAMP ; sleep 1 ; done; &
+iostat -dk -zyx ${physicalDevicesList[*]} ${luksDevicesList[*]} ${loopDevicesList[*]} 0.5 100 > /var/log/iostat.debug.$TIMESTAMP &
+
+# Then try to periodically send via Netcat
+send_iostat_to_netcat &
 
 # Force zpool reopen
 # Disabled for testing on Real Booting System
