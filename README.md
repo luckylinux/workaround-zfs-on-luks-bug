@@ -176,7 +176,7 @@ This should **in principle** no longer be needed, since the Script is Stored in 
 
 Manually Open `/usr/share/initramfs-tools/scripts/zfs` and Change according to the Provided Diff File:
 ```diff
---- /usr/share/initramfs-tools/scripts/zfs.orig	2024-08-20 15:14:18.170417535 +0200
+--- /usr/share/initramfs-tools/scripts/zfs	2024-08-20 15:14:18.170417535 +0200
 +++ /usr/share/initramfs-tools/scripts/zfs	2024-08-20 15:17:11.195822061 +0200
 @@ -228,6 +228,12 @@
  	[ "$quiet" != "y" ] && zfs_log_begin_msg \
@@ -194,6 +194,11 @@ Manually Open `/usr/share/initramfs-tools/scripts/zfs` and Change according to t
  	ZFS_STDERR="$($ZFS_CMD "$pool" 2>&1)"
  	ZFS_ERROR="$?"
 
+```
+
+Apply using:
+```
+patch --verbose -d/ -p0 <zfs-initramfs.patch
 ```
 
 
@@ -266,6 +271,42 @@ With Debian Package `netcat-openbsd` the following set of Options work as it's s
 ```
 echo "xxxx" | nc -N -n -v 192.168.3.66 12345
 ```
+
+## Disable clevis killing Networking
+In order for the Client to be able to send Data to the Remote Netcat Server, it's essential to leave the Networking Up.
+
+For this, the following Patch needs to be applied to ``:
+```diff
+--- /usr/share/initramfs-tools/scripts/local-bottom/clevis      2024-08-22 12:53:35.456685772 +0200
++++ /usr/share/initramfs-tools/scripts/local-bottom/clevis      2024-08-22 12:54:03.157203958 +0200
+@@ -42,11 +42,12 @@
+ # Not really worried about downing extra interfaces: they will come up
+ # during the actual boot. Might make this configurable later if needed.
+ 
+-for iface in /sys/class/net/*; do
+-    if [ -e "$iface" ]; then
+-        iface=$(basename "$iface")
+-        ip link  set   dev "$iface" down
+-        ip addr  flush dev "$iface"
+-        ip route flush dev "$iface"
+-    fi
+-done
++# Disabled in order to allow looptab-debug to send Data to Remote Netcat Server
++#for iface in /sys/class/net/*; do
++#    if [ -e "$iface" ]; then
++#        iface=$(basename "$iface")
++#        ip link  set   dev "$iface" down
++#        ip addr  flush dev "$iface"
++#        ip route flush dev "$iface"
++#    fi
++#done
+```
+
+Apply using:
+```
+patch --verbose -d/ -p0 <clevis.patch
+```
+
 
 ## Log using /etc/rc.local
 Some Logging can be done by using `/etc/rc.local` to "Dump" everything that is needed to a `/var/log`.

@@ -1,4 +1,4 @@
---- /usr/share/initramfs-tools/scripts/zfs.orig	2024-08-20 15:14:18.170417535 +0200
+--- /usr/share/initramfs-tools/scripts/zfs	2024-08-20 15:14:18.170417535 +0200
 +++ /usr/share/initramfs-tools/scripts/zfs	2024-08-20 15:17:11.195822061 +0200
 @@ -228,6 +228,12 @@
  	[ "$quiet" != "y" ] && zfs_log_begin_msg \
