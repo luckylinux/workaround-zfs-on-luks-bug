@@ -124,6 +124,10 @@ zpool status -v | ${NC_BIN} ${NC_OPTIONS}
 echo "Get zfs version Output" | ${NC_BIN} ${NC_OPTIONS}
 zfs version | ${NC_BIN} ${NC_OPTIONS}
 
+# Get Kernel Version
+echo "Get Kernel version Output" | ${NC_BIN} ${NC_OPTIONS}
+uname -a | ${NC_BIN} ${NC_OPTIONS}
+
 # Get Output of zdb -C
 echo "Get zdb -C Output" | ${NC_BIN} ${NC_OPTIONS}
 zdb -C | ${NC_BIN} ${NC_OPTIONS}
