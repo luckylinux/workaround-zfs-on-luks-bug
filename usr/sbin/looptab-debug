@@ -14,9 +14,6 @@ then
    LOG_BASEFOLDER="/run/initramfs"
 fi
 
-# Echo
-echo "Saving Logs to LOG_BASEFOLDER = ${LOG_BASEFOLDER}"  | ${NC_BIN} ${NC_OPTIONS}
-
 # IOStat Debugging
 IOSTAT_INTERVAL="1"
 IOSTAT_COUNT=500
@@ -48,6 +45,9 @@ then
        NC_BIN="nc"
     fi
 fi
+
+# Echo
+echo "Saving Logs to LOG_BASEFOLDER = ${LOG_BASEFOLDER}"  | ${NC_BIN} ${NC_OPTIONS}
 
 # Define "losetup" Executable Path
 LOSETUP_BIN="/usr/sbin/losetup-full"                                                  # Production (IMPORTANT: on the Real System it is /usr/sbin/losetup, in the initramfs it is /usr/bin/losetup !!!) - "losetup" also works correctly though
