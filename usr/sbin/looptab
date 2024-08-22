@@ -69,10 +69,10 @@ do
     # Extract "ID"
     loopDeviceNumber=`echo "$line" | cut -f1 -d'	'`
 
-    # Extract "Source" Device
+    # Extract "Source" (LUKS) Device (full Path)
     sourceDevice=`echo "$line" | cut -f2 -d'	'`
 
-    # Extract "Loop" Device with Custom Name
+    # Extract "Loop" Device with Custom Name (full Path)
     loopDeviceCustomName=`echo "$line" | cut -f3 -d'	'`
 
     # Build "Standardized" Device Path

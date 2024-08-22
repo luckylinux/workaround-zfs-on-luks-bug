@@ -103,15 +103,19 @@ zpool get all rpool all-vdevs | ${NC_BIN} ${NC_OPTIONS}
 
 # Iterate over each Device
 echo "Analysing Loop Device Details" | ${NC_BIN} ${NC_OPTIONS}
+loopDevicesList=""
+luksDevicesList=""
+physicalDevicesList=""
+
 cat /etc/looptab | grep -vE "^#" | while IFS= read -r line;
 do
     # Extract "ID"
     loopDeviceNumber=`echo "$line" | cut -f1 -d'	'`
 
-    # Extract "Source" Device
+    # Extract "Source" Device (full Path)
     sourceDevice=`echo "$line" | cut -f2 -d'	'`
 
-    # Extract "Loop" Device with Custom Name
+    # Extract "Loop" Device with Custom Name (full Path)
     loopDeviceCustomName=`echo "$line" | cut -f3 -d'	'`
 
     # Build "Standardized" Device Path
@@ -126,6 +130,15 @@ do
 
         # Run Command
         ${LOSETUP_BIN} --verbose $loopDevicePath --list --output NAME,SIZELIMIT,OFFSET,AUTOCLEAR,RO,BACK-FILE,DIO,LOG-SEC,BACK-INO,BACK-MAJ:MIN,MAJ:MIN,PARTSCAN | ${NC_BIN} ${NC_OPTIONS}
+
+        # Add to List for iostat Processing later on
+        loopDevicesList="${loopDevicesList} ${loopDeviceCustomName}"
+        luksDevicesList="${luksDevicesList} ${sourceDevice}"
+
+        # Determine the associated Physical Device
+        physicalDeviceWithPartition=`lsblk -s -npo pkname ${sourceDevice} | head -n1`
+        physicalDevice=`lsblk -npo pkname ${physicalDeviceWithPartition} | head -n1`
+        physicalDevicesList="${physicalDevicesList} ${physicalDevice}"
     fi
 done
 
@@ -137,17 +150,14 @@ dmsetup table | ${NC_BIN} ${NC_OPTIONS}
 echo "Analysing lsblk Ouput" | ${NC_BIN} ${NC_OPTIONS}
 lsblk --all --bytes -to +START,SIZE,TYPE --output NAME,ALIGNMENT,MIN-IO,OPT-IO,PHY-SEC,LOG-SEC,ROTA,SCHED,RQ-SIZE,RA,WSAME,START,SIZE,TYPE,MAJ:MIN | ${NC_BIN} ${NC_OPTIONS}
 
-# Send Contents of /run/initramfs/initramfs.debug to Remote Netcat Server
-if [ -f "/run/initramfs/initramfs.debug" ]
-then
-   cat "/run/initramfs/initramfs.debug" | ${NC_BIN} ${NC_OPTIONS}
-fi
+# Get a "one-off" iostat Output
+echo "Analysing iostat Ouput (one-off)" | ${NC_BIN} ${NC_OPTIONS}
+iostat -dk -zyx ${physicalDevicesList[*]} ${luksDevicesList[*]} ${loopDevicesList[*]} 1 1 | ${NC_BIN} ${NC_OPTIONS}
 
-# Copy /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$timestamp
-if [ -f "/run/initramfs/initramfs.debug" ]
-then
-   cp "/run/initramfs/initramfs.debug" "/var/log/initramfs.debug.$TIMESTAMP"
-fi
+# Launch "iostat" in the Background and save to File, then try to periodically send via Netcat
+echo "Launching iostat in the Background and saving Results to /var/log/iostat.debug.$TIMESTAMP"
+touch /var/log/iostat.debug.$TIMESTAMP
+iostat -dk -zyx ${physicalDevicesList[*]} ${luksDevicesList[*]} ${loopDevicesList[*]} 0.5 100 > /var/log/iostat.debug.$TIMESTAMP & while true; do cat /var/log/iostat.debug.$TIMESTAMP ; sleep 1 ; done; &
 
 # Force zpool reopen
 # Disabled for testing on Real Booting System
@@ -156,6 +166,20 @@ fi
 
 # Echo
 echo "Ending DEBUG at $TIMESTAMP"  | ${NC_BIN} ${NC_OPTIONS}
+
+# Send Contents of /run/initramfs/initramfs.debug to Remote Netcat Server
+if [ -f "/run/initramfs/initramfs.debug" ]
+then
+   echo "Sending /run/initramfs/initramfs.debug to Remote Netcat Server" | ${NC_BIN} ${NC_OPTIONS}
+   cat "/run/initramfs/initramfs.debug" | ${NC_BIN} ${NC_OPTIONS}
+fi
+
+# Copy /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$timestamp
+if [ -f "/run/initramfs/initramfs.debug" ]
+then
+   echo "Copying /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$TIMESTAMP"
+   cp "/run/initramfs/initramfs.debug" "/var/log/initramfs.debug.$TIMESTAMP"
+fi
 
 # Return OK Code
 exit 0
