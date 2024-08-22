@@ -27,6 +27,9 @@ copy_exec "/usr/bin/lsblk"
 # Copy zsb Executable
 copy_exec "/usr/sbin/zdb"
 
+# Copy iostat Executable
+copy_exec "/usr/bin/iostat"
+
 # Copy uname Executable (normally it's included by default anyways)
 copy_exec "/usr/bin/uname"
 

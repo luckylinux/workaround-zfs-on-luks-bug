@@ -59,14 +59,14 @@ send_iostat_to_netcat() {
         currentTimestamp=`date +"%Y%m%d_%H%M%S"`
 
         # Echo
-        echo "Start Sending /var/log/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | ${NC_BIN} ${NC_OPTIONS}
+        echo "Start Sending /run/initramfs/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | ${NC_BIN} ${NC_OPTIONS}
         echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
         # Send Data
-        cat /var/log/iostat.debug.$TIMESTAMP | ${NC_BIN} ${NC_OPTIONS}
+        cat /run/initramfs/iostat.debug.$TIMESTAMP | ${NC_BIN} ${NC_OPTIONS}
 
         # Echo
-        echo "Finished Sending /var/log/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | ${NC_BIN} ${NC_OPTIONS}
+        echo "Finished Sending /run/initramfs/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | ${NC_BIN} ${NC_OPTIONS}
         echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
         # Wait
@@ -229,11 +229,10 @@ iostat -dk -zyx $@ ${IOSTAT_INTERVAL} 1 | ${NC_BIN} ${NC_OPTIONS}
 echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
 # Launch "iostat" in the Background and save to File
-echo "Launching iostat in the Background and saving Results to /var/log/iostat.debug.$TIMESTAMP"
-touch /var/log/iostat.debug.$TIMESTAMP
+echo "Launching iostat in the Background and saving Results to /run/initramfs/iostat.debug.$TIMESTAMP"
+touch /run/initramfs/iostat.debug.$TIMESTAMP
 set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
-iostat -dk -zyx $@ ${IOSTAT_INTERVAL} ${IOSTAT_COUNT} > /var/log/iostat.debug.$TIMESTAMP &
-
+iostat -dk -zyx $@ ${IOSTAT_INTERVAL} ${IOSTAT_COUNT} > /run/initramfs/iostat.debug.$TIMESTAMP &
 
 # Then try to periodically send via Netcat
 send_iostat_to_netcat &
@@ -258,7 +257,7 @@ then
    echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 fi
 
-# Copy /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$timestamp
+# Copy /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$TIMESTAMP
 if [ -f "/run/initramfs/initramfs.debug" ]
 then
    echo "Copying /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$TIMESTAMP"
@@ -271,7 +270,7 @@ echo "==========================================================================
 dmesg | ${NC_BIN} ${NC_OPTIONS}
 echo "============================================================================================================================================================" | ${NC_BIN} ${NC_OPTIONS}
 
-# Dump dmesg to /var/log/dmesg.debug.$timestamp
+# Dump dmesg to /var/log/dmesg.debug.$TIMESTAMP
 echo "Dumping dmesg to /var/log/dmesg.debug.$TIMESTAMP"
 dmesg > "/var/log/dmesg.debug.$TIMESTAMP" 2>&1
 

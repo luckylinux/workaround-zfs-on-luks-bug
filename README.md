@@ -267,6 +267,83 @@ With Debian Package `netcat-openbsd` the following set of Options work as it's s
 echo "xxxx" | nc -N -n -v 192.168.3.66 12345
 ```
 
+## Log using /etc/rc.local
+Some Logging can be done by using `/etc/rc.local` to "Dump" everything that is needed to a `/var/log`.
+Hopefully this happens soon enough before the System starts throwing `zio` errors but it's NOT guaranteed.
+
+`/etc/rc.local/` Contents:
+```
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+# Generate Timestamp
+TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+
+# Copy /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$TIMESTAMP
+if [ -f "/run/initramfs/initramfs.debug" ]
+then
+   cp "/run/initramfs/initramfs.debug" "/var/log/initramfs.debug.$TIMESTAMP"
+fi
+
+# Dump dmesg to /var/log/dmesg.debug.$TIMESTAMP 
+echo "Dumping dmesg to /var/log/dmesg.debug.$TIMESTAMP"
+dmesg > "/var/log/dmesg.debug.$TIMESTAMP" 2>&1
+
+# Copy /run/initramfs/iostat.debug to /var/log/iostat.debug.$TIMESTAMP
+if [ -f "/run/initramfs/iostat.debug" ]
+then
+   cp "/run/initramfs/iostat.debug" "/var/log/iostat.debug.$TIMESTAMP"
+fi
+
+# Force zpool reopen
+#zpool reopen
+#zpool reopen rpool
+
+# Exit status
+exit 0
+```
+
+Enable `/etc/rc.local` on Debian based Systems:
+```
+# Make it executable
+chmod +x /etc/rc.local
+
+# Create Systemd service to enable /etc/rc.local
+mkdir -p /etc/systemd/system
+tee /etc/systemd/system/rc-local.service <<EOF 
+
+[Unit]
+ Description=/etc/rc.local Compatibility
+ ConditionPathExists=/etc/rc.local
+
+[Service]
+ Type=forking
+ ExecStart=/etc/rc.local start
+ TimeoutSec=0
+ StandardOutput=tty
+ RemainAfterExit=yes
+ SysVStartPriority=99
+
+[Install]
+ WantedBy=multi-user.target
+EOF
+
+# Enable & start service
+systemctl enable rc-local.service
+systemctl start rc-local.service
+systemctl status rc-local.service
+```
+
 # Old Stuff
 Replace Drives and Fix Path (Second Attempt - Device Paths were changed back to devid since the Loop Device couldn't be found)
 
