@@ -9,6 +9,7 @@ then
    # Use /var/log for saving Data
    LOG_BASEFOLDER="/var/log"
 elif [ -d "/run/initramfs" ]
+then
    # Use /run/initramfs for saving Data
    LOG_BASEFOLDER="/run/initramfs"
 fi
