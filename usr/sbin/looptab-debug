@@ -183,6 +183,18 @@ ${ECHO_CMD} "===================================================================
 printenv | log_data
 ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
+# Boot Mode
+if [ -d "/sys/firmware/efi" ]
+then
+    ${ECHO_CMD} "Folder /sys/firmware/efi was detected on this System. System Booted in UEFI Mode." | log_data
+    ${ECHO_CMD} "Contents of /sys/firmware/efi Folder" | log_data
+    ${ECHO_CMD} "============================================================================================================================================================" | log_data
+    ls -l /sys/firmware/efi/* | log_data
+    ${ECHO_CMD} "============================================================================================================================================================" | log_data
+else
+    ${ECHO_CMD} "Folder /sys/firmware/efi was NOT detected on this System. System Booted in BIOS Mode." | log_data
+fi
+
 # Echo
 ${ECHO_CMD} "INFO: Using losetup Executable / Command: ${LOSETUP_BIN}" | log_data
 
