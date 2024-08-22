@@ -69,7 +69,7 @@ send_iostat_to_netcat() {
         sleep 1
 
         # Increase Counter
-        loopDeviceCounter=$((loopDeviceCounter+1))
+        netcatLoopCounter=$((netcatLoopCounter+1))
     done
 }
 
@@ -184,12 +184,12 @@ lsblk --all --bytes -to +START,SIZE,TYPE --output NAME,ALIGNMENT,MIN-IO,OPT-IO,P
 
 # Get a "one-off" iostat Output
 echo "Analysing iostat Ouput (one-off)" | ${NC_BIN} ${NC_OPTIONS}
-iostat -dk -zyx ${physicalDevicesList[*]} ${luksDevicesList[*]} ${loopDevicesList[*]} 1 1 | ${NC_BIN} ${NC_OPTIONS}
+iostat -dk -zyx ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList} 1 1 | ${NC_BIN} ${NC_OPTIONS}
 
 # Launch "iostat" in the Background and save to File
 echo "Launching iostat in the Background and saving Results to /var/log/iostat.debug.$TIMESTAMP"
 touch /var/log/iostat.debug.$TIMESTAMP
-iostat -dk -zyx ${physicalDevicesList[*]} ${luksDevicesList[*]} ${loopDevicesList[*]} 0.5 100 > /var/log/iostat.debug.$TIMESTAMP &
+iostat -dk -zyx ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList} 0.5 100 > /var/log/iostat.debug.$TIMESTAMP &
 
 # Then try to periodically send via Netcat
 send_iostat_to_netcat &
