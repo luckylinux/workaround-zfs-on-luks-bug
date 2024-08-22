@@ -1,0 +1,12 @@
+# Private Configuration
+config
+config/*
+config/**
+
+analysis
+analysis/*
+analysis/**
+
+debug
+debug/*
+debug/**

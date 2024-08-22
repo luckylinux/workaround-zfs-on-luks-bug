@@ -31,3 +31,5 @@ chmod +x /usr/share/initramfs-tools/hooks/looptab-debug
 chmod +x /usr/share/initramfs-tools/scripts/local-premount/looptab
 chmod +x /usr/share/initramfs-tools/scripts/init-bottom/looptab-debug
 
+# Install Debug Tools
+aptitude install systat netcat-openbsd
