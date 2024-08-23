@@ -389,7 +389,7 @@ fi
 if [ -x "/usr/bin/dpkg" ]
 then
     # List Installed Packages
-    ${ECHO_CMD} "Sending journalctl -xb --no-pager to Remote Netcat Server" | log_data
+    ${ECHO_CMD} "Sending dpkg -l --no-pager to Remote Netcat Server" | log_data
     ${ECHO_CMD} "============================================================================================================================================================" | log_data
     dpkg -l --no-pager  | log_data
     ${ECHO_CMD} "============================================================================================================================================================" | log_data
@@ -400,13 +400,13 @@ then
     # List Systemd Units
     ${ECHO_CMD} "Sending systemctl list-units --no-pager to Remote Netcat Server" | log_data
     ${ECHO_CMD} "============================================================================================================================================================" | log_data
-    ${ECHO_CMD} "systemctl list-units --no-pager"  | log_data
+    systemctl list-units --no-pager  | log_data
     ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
     # List Systemd Unit Files
     ${ECHO_CMD} "Sending systemctl list-unit-files --no-pager to Remote Netcat Server" | log_data
     ${ECHO_CMD} "============================================================================================================================================================" | log_data
-    ${ECHO_CMD} "systemctl list-unit-files --no-pager"  | log_data
+    systemctl list-unit-files --no-pager  | log_data
     ${ECHO_CMD} "============================================================================================================================================================" | log_data
 fi
 
