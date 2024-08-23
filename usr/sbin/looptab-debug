@@ -254,6 +254,8 @@ ${ECHO_CMD} "===================================================================
 
 # Iterate over each Device
 ${ECHO_CMD} "Analysing Loop Device Details" | log_data
+
+# !! NOT working in BUSYBOX Shell / Initramfs !!
 #loopDevicesList=""
 #luksDevicesList=""
 #physicalDevicesList=""
@@ -302,6 +304,9 @@ do
     fi
 done
 
+# Save Resulting Device List
+allDevices=$@
+
 # Get dmsetup table Output
 ${ECHO_CMD} "Analysing dmsetup Table Ouput" | log_data
 ${ECHO_CMD} "============================================================================================================================================================" | log_data
@@ -317,14 +322,22 @@ ${ECHO_CMD} "===================================================================
 # Get a "one-off" iostat Output
 ${ECHO_CMD} "Analysing iostat Ouput (one-off)" | log_data
 ${ECHO_CMD} "============================================================================================================================================================" | log_data
+
+# !! Does NOT work in BUSYBOX / initramfs shell (especially if Variable Contains Spaces, only the space is retained) !!
 #set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
+
+set -- $allDevices
 iostat -dk -zyx $@ ${IOSTAT_INTERVAL} 1 | log_data
 ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Launch "iostat" in the Background and save to File
 ${ECHO_CMD} "Launching iostat in the Background and saving Results to ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
 touch ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP
+
+# !! Does NOT work in BUSYBOX / initramfs shell (especially if Variable Contains Spaces, only the space is retained) !!
 #set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
+
+set -- $allDevices
 iostat -dk -zyx $@ ${IOSTAT_INTERVAL} ${IOSTAT_COUNT} > ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP &
 
 # Then try to periodically send via Netcat
