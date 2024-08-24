@@ -451,6 +451,21 @@ ln -s /dev/null /etc/systemd/system-generators/systemd-cryptsetup-generator
 mv /usr/lib/systemd/system-generators/systemd-cryptsetup-generator /root/systemd-cryptsetup-generator.disabled
 ```
 
+# Analysis of the Issue
+Originally the Issue showed up using an Intel onboard SATA Controller.
+
+As Part of the Troubleshooting, I switched over to a LSI 9217-4i4e HBA with Firmware P20 in IT Mode + BIOS (in order to enable booting from the SSDs attached to the HBA).
+
+The Issue got solved by setting up the Loop Device in chroot **AND** issueing `zpool reopen` and/or `zpool reopen rpool`.
+
+HOWEVER, there was still something not working once the Real System would boot (e.g. `systemd-cryptsetup`, `systemd-cryptsetup-generator` and their associated Children closing the LUKS Device while it was in use on this System, for some weird Reason).
+
+However, once I switched back to using the Onboard Intel SATA Controller, the System booted up without Issues.
+
+Points worth maybe to be further investigated:
+- Disable TRIM in `/etc/crypttab` (**remove** `discard` from `/etc/crypttab` for each Device)
+- Disable Systemd `fstrim` Service: `systemctl disable fstrim.service`
+
 # Development
 In order to test that Things are **actually** working the way the **should**, it's not sufficient to run the `/usr/sbin/looptab-debug` on a Modern System.
 
