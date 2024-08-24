@@ -461,7 +461,7 @@ System Information:
 - CPU: Intel Xeon E3 1240 v5
 - RAM: 64GB DDR4 Unbuffered ECC RAM 2666MHz running at 2133 MHz
 - Onboard SATA Controller Used (White SATA Ports)
-- ![Motherboard Image](https://private-user-images.githubusercontent.com/7126291/357674713-7c95d991-5ca8-4afe-a848-b4102d21bb5e.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjQ1MTYwNDksIm5iZiI6MTcyNDUxNTc0OSwicGF0aCI6Ii83MTI2MjkxLzM1NzY3NDcxMy03Yzk1ZDk5MS01Y2E4LTRhZmUtYTg0OC1iNDEwMmQyMWJiNWUucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDgyNCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA4MjRUMTYwOTA5WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9NjA4MDY3ZGIwN2ZiODFiOWZiYjEwNDY0Y2VjYmUyNTE5N2RiOGViOTMxODhjNWE0MDhiYTgyMzA5MGVjY2MyYyZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.6UNFYg_P_zHX579VynL3kGwIX-snJWOpZG_meaN5pT0)
+  ![Motherboard Image](https://private-user-images.githubusercontent.com/7126291/357674713-7c95d991-5ca8-4afe-a848-b4102d21bb5e.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjQ1MTYwNDksIm5iZiI6MTcyNDUxNTc0OSwicGF0aCI6Ii83MTI2MjkxLzM1NzY3NDcxMy03Yzk1ZDk5MS01Y2E4LTRhZmUtYTg0OC1iNDEwMmQyMWJiNWUucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDgyNCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA4MjRUMTYwOTA5WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9NjA4MDY3ZGIwN2ZiODFiOWZiYjEwNDY0Y2VjYmUyNTE5N2RiOGViOTMxODhjNWE0MDhiYTgyMzA5MGVjY2MyYyZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.6UNFYg_P_zHX579VynL3kGwIX-snJWOpZG_meaN5pT0)
 - Alternative test using LSI 9217-4i4e Cross-flashed to IT Model P20 Firmware + BIOS Boot ROM (which is the Current Configuration)
 - Disks: Crucial MX500 1000GB from 2022, FW 046 (upgraded from 042 or 043 in order to Prevent some known BUGs)
 
@@ -480,11 +480,10 @@ LiveUSB System:
 - OS: Debian GNU/Linux 12 Bookworm AMD with Kernel+ZFS from Backports Repository
 - Kernel: linux-image-6.9.7+bpo-amd64 or linux-image-6.7.12+bpo-amd64, I will try to always boot with linux-image-6.7.12+bpo-amd64 in order to keep a "compliant" Kernel "officially" supported by ZFS (<= Kernel 6.8.x)
 - ZFS: 2.2.4 from Debian Backports
-
-```
-zfs-2.2.4-1~bpo12+1
-zfs-kmod-2.2.4-1~bpo12+1
-```
+  ```
+  zfs-2.2.4-1~bpo12+1
+  zfs-kmod-2.2.4-1~bpo12+1
+  ```
 
 As Part of the Troubleshooting, I switched over to a LSI 9217-4i4e HBA with Firmware P20 in IT Mode + BIOS (in order to enable booting from the SSDs attached to the HBA).
 
