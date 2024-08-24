@@ -417,6 +417,40 @@ systemctl start rc-local.service
 systemctl status rc-local.service
 ```
 
+## Disable Systemd Cryptsetup Service and Generators
+In order to disable Cryptsetup Service and Generators the following is required **at a minimum**:
+```
+systemctl mask systemd-cryptsetup
+```
+
+```
+systemctl mask systemd-cryptsetup-generator
+```
+
+ALSO the Actual Devices, **NOT JUST THE TEMPLATE**:
+```
+systemctl mask systemd-cryptsetup@ata\x2dCT1000MX500SSD1_2205E6057147_crypt.service
+```
+
+
+```
+systemctl mask systemd-cryptsetup@ata\x2dCT1000MX500SSD1_2205E6057147_crypt.service
+```
+
+
+Since Systemd might be stubborn about it, we might need to manually fix / disable the Generator:
+```
+mkdir /etc/systemd/system-generators
+```
+
+```
+ln -s /dev/null /etc/systemd/system-generators/systemd-cryptsetup-generator
+```
+
+```
+mv /usr/lib/systemd/system-generators/systemd-cryptsetup-generator /root/systemd-cryptsetup-generator.disabled
+```
+
 # Development
 In order to test that Things are **actually** working the way the **should**, it's not sufficient to run the `/usr/sbin/looptab-debug` on a Modern System.
 
