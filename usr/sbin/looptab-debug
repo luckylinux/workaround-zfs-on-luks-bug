@@ -307,15 +307,13 @@ do
     # Check if Device Exists
     if [ -b "$loopDevicePath" ]
     then
-        # Echo
+        # Analyse output of losetup --verbose
         ${ECHO_CMD} "Check Loop Device Information for $loopDevicePath"| log_data
         ${ECHO_CMD} "Executing Command: ${LOSETUP_BIN} $loopDevicePath" | log_data
         ${ECHO_CMD} "============================================================================================================================================================" | log_data
-
-        # Run Command
         ${LOSETUP_BIN} --verbose "$loopDevicePath" --list --output NAME,SIZELIMIT,OFFSET,AUTOCLEAR,RO,BACK-FILE,DIO,LOG-SEC,BACK-INO,BACK-MAJ:MIN,MAJ:MIN,PARTSCAN | log_data
-
         ${ECHO_CMD} "============================================================================================================================================================" | log_data
+
 
         # Add to List for iostat Processing later on
         #loopDevicesList="${loopDevicesList} ${loopDeviceCustomName}"
@@ -329,6 +327,12 @@ do
         # Append to Device List
         # !! NOT working in BUSYBOX Shell / Initramfs !!
         #set -- $@ ${loopDeviceCustomName} ${sourceDevice} ${physicalDevice}
+
+        # Analyse Smartctl Output
+        ${ECHO_CMD} "Analysing smartctl Ouput for $physicalDevice" | log_data
+        ${ECHO_CMD} "============================================================================================================================================================" | log_data
+        /usr/sbin/smartctl -a "$physicalDevice" | log_data
+        ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
         # Assign to Variable
         if [ $loopDeviceCounter -eq 0 ]
