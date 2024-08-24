@@ -27,7 +27,7 @@ IOSTAT_COUNT=60
 # Try to disable these if you have problems getting the full log over netcat (this creates additional write Requests to the already misbehaving Drive)
 IOSTAT_ENABLE_ONEOFF=0
 IOSTAT_ENABLE_LOOP=0
-
+IOSTAT_ENABLE_MANUAL_SEND=0
 
 # Custom Commands
 ECHO_CMD="/usr/bin/echo"
@@ -418,6 +418,16 @@ then
    ${ECHO_CMD} "============================================================================================================================================================" | log_data
    ${CAT_CMD} "/run/initramfs/initramfs.debug" | log_data
    ${ECHO_CMD} "============================================================================================================================================================" | log_data
+else
+   ${ECHO_CMD} "WARNING: /run/initramfs/initramfs.debug could NOT be found" | log_data
+   ${ECHO_CMD} "Contents of /run Folder" | log_data
+   ${ECHO_CMD} "============================================================================================================================================================" | log_data
+   ls -l /run/* | log_data
+   ${ECHO_CMD} "============================================================================================================================================================" | log_data
+   ${ECHO_CMD} "Contents of /run/initramfs Folder" | log_data
+   ${ECHO_CMD} "============================================================================================================================================================" | log_data
+   ls -l /run/initramfs/* | log_data
+   ${ECHO_CMD} "============================================================================================================================================================" | log_data
 fi
 
 # Copy /run/initramfs/initramfs.debug to /var/log/initramfs.debug.$TIMESTAMP
@@ -455,11 +465,14 @@ then
     fi
 fi
 
-# Send Result of iostat Background Job to Remote Netcat Server
-${ECHO_CMD} "Sending Result of iostat Background Job ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP to Remote Netcat Server" | log_data
-${ECHO_CMD} "============================================================================================================================================================" | log_data
-${CAT_CMD} "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
-${ECHO_CMD} "============================================================================================================================================================" | log_data
+if [ ${IOSTAT_ENABLE_MANUAL_SEND} -eq 1 ]
+then
+    # Manual Send Result of iostat Background Job to Remote Netcat Server
+    ${ECHO_CMD} "Sending Result of iostat Background Job ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP to Remote Netcat Server" | log_data
+    ${ECHO_CMD} "============================================================================================================================================================" | log_data
+    ${CAT_CMD} "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
+    ${ECHO_CMD} "============================================================================================================================================================" | log_data
+fi
 
 # If Running on a Live System, also send dpkg -l --no-pager to Remote Netcat Server
 if [ -x "/usr/bin/dpkg" ]
@@ -486,6 +499,10 @@ then
     systemctl list-unit-files --no-pager  | log_data
     ${ECHO_CMD} "============================================================================================================================================================" | log_data
 fi
+
+# Do again a a-posteriori analysis of /dev/loop/*, /dev/mapper/*, etc
+
+
 
 # Return OK Code
 exit 0
