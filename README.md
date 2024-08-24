@@ -168,9 +168,7 @@ ZPOOL_CACHE=""
 Make sure that all other `ZPOOL_IMPORT_OPTS` and `ZPOOL_CACHE` Lines are Commented !!!
 
 ## (Probably not needed anymore) Need to modify ZFS/OpenZFS initramfs Script
-~~
-This is required because, even if `PREREQ` is used correctly, for some Reason (to be investigated) the `looptab` Script (this Project) is executed BEFORE `clevis` even unlocks the Disks, so ZFS will either fall back to the `devid` or, in case the Cachefile is enfored, most likely just panic.
-~~
+~~This is required because, even if `PREREQ` is used correctly, for some Reason (to be investigated) the `looptab` Script (this Project) is executed BEFORE `clevis` even unlocks the Disks, so ZFS will either fall back to the `devid` or, in case the Cachefile is enfored, most likely just panic.~~
 
 This should **in principle** no longer be needed, since the Script is Stored in the `local-premount` Subfolder and NOT in the `local-top` Subfolder anymore !
 
@@ -453,6 +451,22 @@ mv /usr/lib/systemd/system-generators/systemd-cryptsetup-generator /root/systemd
 
 # Post-Analysis of the Issue
 
+## Summary
+The System got back on its Feet after several Days of Troubleshooting and several Procedurs, some of which might **NOT** be required:
+01. ~~Changing from Intel Sata Controller to LSI HBA - This probably made the "Real System" Boot Situation worse, based on the outcome (see below)~~
+02. Configure Loop Devices in `chroot`
+03. Configure `/etc/default/zfs` to Forcefully use the Cachefile during Import at Boot
+04. Regenerate `/etc/zfs/zpool.cache` each Time before rebuilding the Initramfs (from LiveUSB in particular since imports default to the LUKS Device "Directly", NOT the LOOP Device, that needs to be Configured later)
+05. Issue `zpool reopen` and/or `zpool reopen rpool`
+06. Disable `systemd-cryptsetup` Service
+07. Disable `systemd-cryptsetup-generator` Generator
+08. (Re)Move `/usr/lib/systemd/system-generators/systemd-cryptsetup-generator`
+09. Symlinking `/etc/systemd/system-generators/systemd-cryptsetup-generator` to `/dev/null`
+
+Most of the work in this Repository (unfortunately) was on `usr/sbin/looptab-debug` to Troubleshoot these weird Boot-Time Issues.
+
+The `usr/sbin/looptab` Script is fairly simple: just setup LOOP Devices at Boot Time (or Run Time - see `auto_convert.sh` for an Example) and provide some symlinks in `/dev/loop/` for Convenience (I prefer Device Names with SSD/HDD Manufacturer+Model+Serial since that's easier for me to Track than say `/dev/sda` or `/dev/loop0` which might change).
+
 ## Background
 Originally the Issue showed up using an Intel onboard SATA Controller.
 
@@ -499,6 +513,7 @@ However, there was still something not working once the Real System would boot.
 
 ### Replace ROOT Filesystem with Copy from working System
 An attempt was made to replace `rpool/ROOT/debian` from the Faulty System with `rpool/ROOT/debian` from a very similar and known working System which had already undergone the LOOP Device "Hack" described in this Repository.
+
 Once restored, modifications/restore from Backup were required to the following Files (YMMV):
 - `/etc/hostname`
 - `/etc/hosts`
@@ -517,10 +532,10 @@ Once restored, modifications/restore from Backup were required to the following 
 - `/etc/ssh/ssh_host_*` (SSH Keys - Forgot that)
 - The usual ... `update-grub` , `update-initramfs -k all -u`, etc
 
-In particular the Proxmox VE Configuration Database `/var/lib/pve-cluster` is Key to get `/etc/pve` working correctly after next Reboot.
+In particular the Proxmox VE Configuration Database `/var/lib/pve-cluster` and the Hostname (`/etc/hostname` and `/etc/hosts`) are Key to get `/etc/pve` working correctly after next Reboot.
 
 ### Manually disabling some Systemd Services
-In Particular, the following Systemd Services/Generators would attempt to close the LUKS Device while it was in use on this System, for some weird Reason:
+The following Systemd Services/Generators would attempt to close the LUKS Device while it was in use on this System, for some weird Reason:
 - `systemd-cryptsetup` 
 - `systemd-cryptsetup-generator`
 - Their associated "Children" / Automatically Generated Services:
@@ -529,11 +544,15 @@ In Particular, the following Systemd Services/Generators would attempt to close 
 
 Even after disabling those according to the Instructions in the upper Section of this README (including removing the `/usr/lib/systemd/system-generators/systemd-cryptsetup-generator` File to make absolutely sure that Systemd wouldn't do something weird with it), the `zio` Barrage of Errors would keep going after the System booted up !
 
+`systemd-udev` might also be at Play here.
+
 ### Switching back from the LSI HBA to the Onboard Intel SATA Controller
-Out of Ideas, I decided to swich back to the Onboard Intel SATA Controller, and at that Point the System booted up without Issues.
+Out of Ideas, I decided to switch back to the Onboard Intel SATA Controller.
+
+Weirdly enough, the System booted up without Issues.
 
 ### Points for further Evaluation
-This **migh** (or NOT !) be related to lack of TRIM Support on LSI HBA and/or some weird Issue when using LSI HBA with IT P20 Firmware + BIOS (in order to be able to boot the System from them).
+This **might** (or NOT !) be related to lack of TRIM Support on LSI HBA for the Crucial MX500 SSDs and/or some weird Issue when using LSI HBA with IT P20 Firmware + BIOS (in order to be able to boot the System from them).
 From the Logs it would seem that some Power Management Commands are sent to the Drives.
 
 Anectdotally it seems that booting from the LSI HBA, once the BIOS reached the Point where it's loading the OS / Bootloader from the SSD or HDD, is MUCH slower (e.g. 15s from LSI HBA vs 1-2s from Intel SATA Controller), with all other Things being equal (LSI HBA is still physically installed in the System, LSI HBA BIOS is still loading & scanning, etc). Literally loading GRUB and the first lines of Linux Kernel Output are just **MUCH SLOWER**.
