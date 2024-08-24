@@ -26,7 +26,7 @@ IOSTAT_COUNT=60
 
 # Custom Commands
 ECHO_CMD="/usr/bin/echo"
-PRINTF_CMD="/usr/bin/printf"
+#PRINTF_CMD="/usr/bin/printf"
 CAT_CMD="/usr/bin/cat"
 
 # Echo
@@ -78,7 +78,7 @@ log_data() {
     cat /dev/stdin | tee /dev/tty0 | ${NC_BIN} ${NC_OPTIONS}
 
     # Read data into a local variable
-    #local ldata=`cat`
+    #ldata=`cat`
 
     # First echo the Content to stdout
     #${ECHO_CMD} -e "$ldata"
@@ -101,7 +101,7 @@ LOSETUP_BIN="/usr/sbin/losetup-full"                                            
 #LOSETUP_BIN="/usr/src/initramfs-investigation/6.8.0-40-generic/main/usr/bin/losetup" # Testing with uncompressed initramfs
 
 # Define "losetup" Command-Line Options
-LOSETUP_OPTIONS="-b 4096"
+#LOSETUP_OPTIONS="-b 4096"
 
 # Timestamp
 TIMESTAMP=`date +"%Y%m%d-%H%M%S"`
@@ -109,10 +109,10 @@ TIMESTAMP=`date +"%Y%m%d-%H%M%S"`
 # Custom Function to send IOStat to Netcat
 send_iostat_to_netcat() {
     # Initialize counter
-    local netcatLoopCounter=0
+    netcatLoopCounter=0
 
     # Initialize Variable
-    local currentTimestamp=""
+    currentTimestamp=""
 
     while [ $netcatLoopCounter -lt ${IOSTAT_COUNT} ]
     do
@@ -124,7 +124,7 @@ send_iostat_to_netcat() {
         ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
         # Send Data
-        ${CAT_CMD} ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP | log_data
+        ${CAT_CMD} "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
 
         # Echo
         ${ECHO_CMD} "Finished Sending ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | log_data
@@ -261,9 +261,28 @@ ${ECHO_CMD} "Analysing Loop Device Details" | log_data
 #physicalDevicesList=""
 
 # Initialize Device List
-set -- ""
+#set -- ""
 
-${CAT_CMD} /etc/looptab | grep -vE "^#" | while IFS= read -r line;
+# Manual "Quick-Fix" for up to 2 Physical + 2 LUKS + 2 LOOP Devices
+loopDevice0=""
+loopDevice1=""
+luksDevice0=""
+luksDevice1=""
+physicalDevice0=""
+physicalDevice1=""
+
+# Initialize Device Counter
+loopDeviceCounter=0
+
+# ShellCheck shows that this triggers SC2031 - var was modified in a subshell. That change might be lost.
+#${CAT_CMD} /etc/looptab | grep -vE "^#" | while IFS= read -r line;
+
+# ShellCheck shows SC3001 - In POSIX sh, process substitution is undefined.
+# Use temporary files instead
+tmpFile="$(mktemp)"
+${CAT_CMD} /etc/looptab | grep -vE "^#" > "$tmpFile"
+
+while IFS= read -r line;
 do
     # Extract "ID"
     loopDeviceNumber=`echo "$line" | cut -f1 -d'	'`
@@ -278,7 +297,7 @@ do
     loopDevicePath="/dev/loop$loopDeviceNumber"
 
     # Check if Device Exists
-    if [ -b $loopDevicePath ]
+    if [ -b "$loopDevicePath" ]
     then
         # Echo
         ${ECHO_CMD} "Check Loop Device Information for $loopDevicePath"| log_data
@@ -286,7 +305,7 @@ do
         ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
         # Run Command
-        ${LOSETUP_BIN} --verbose $loopDevicePath --list --output NAME,SIZELIMIT,OFFSET,AUTOCLEAR,RO,BACK-FILE,DIO,LOG-SEC,BACK-INO,BACK-MAJ:MIN,MAJ:MIN,PARTSCAN | log_data
+        ${LOSETUP_BIN} --verbose "$loopDevicePath" --list --output NAME,SIZELIMIT,OFFSET,AUTOCLEAR,RO,BACK-FILE,DIO,LOG-SEC,BACK-INO,BACK-MAJ:MIN,MAJ:MIN,PARTSCAN | log_data
 
         ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
@@ -295,17 +314,37 @@ do
         #luksDevicesList="${luksDevicesList} ${sourceDevice}"
 
         # Determine the associated Physical Device
-        physicalDeviceWithPartition=`lsblk -s -npo pkname ${sourceDevice} | head -n1`
-        physicalDevice=`lsblk -npo pkname ${physicalDeviceWithPartition} | head -n1`
+        physicalDeviceWithPartition=`lsblk -s -npo pkname "${sourceDevice}" | head -n1`
+        physicalDevice=`lsblk -npo pkname "${physicalDeviceWithPartition}" | head -n1`
         #physicalDevicesList="${physicalDevicesList} ${physicalDevice}"
 
         # Append to Device List
-        set -- $@ ${loopDeviceCustomName} ${sourceDevice} ${physicalDevice}
+        # !! NOT working in BUSYBOX Shell / Initramfs !!
+        #set -- $@ ${loopDeviceCustomName} ${sourceDevice} ${physicalDevice}
+
+        # Assign to Variable
+        if [ $loopDeviceCounter -eq 0 ]
+        then
+            loopDevice0="$loopDeviceCustomName"
+            luksDevice0="$sourceDevice"
+            physicalDevice0="$physicalDevice"
+        elif [ $loopDeviceCounter -eq 1 ]
+        then
+            loopDevice1="$loopDeviceCustomName"
+            luksDevice1="$sourceDevice"
+            physicalDevice1="$physicalDevice"
+        fi
+
+        # Increase Counter
+        loopDeviceCounter=$((loopDeviceCounter+1))
     fi
-done
+#done # SC2031
+#done < <(${CAT_CMD} /etc/looptab | grep -vE "^#") # SC3001
+done < "$tmpFile"
 
 # Save Resulting Device List
-allDevices=$@
+# !! NOT working in BUSYBOX Shell / Initramfs !!
+#allDevices=$@
 
 # Get dmsetup table Output
 ${ECHO_CMD} "Analysing dmsetup Table Ouput" | log_data
@@ -325,23 +364,23 @@ ${ECHO_CMD} "===================================================================
 
 # !! Does NOT work in BUSYBOX / initramfs shell (especially if Variable Contains Spaces, only the space is retained) !!
 #set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
-
-set -- $allDevices
-iostat -dk -zyx $@ ${IOSTAT_INTERVAL} 1 | log_data
+#set -- $allDevices
+#iostat -dk -zyx $@ ${IOSTAT_INTERVAL} 1 | log_data
+iostat -dk -zyx "$physicalDevice0" "$physicalDevice1" "$luksDevice0" "$luksDevice1" "$loopDevice0" "$loopDevice1" "${IOSTAT_INTERVAL}" 1 | log_data
 ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
 # Launch "iostat" in the Background and save to File
 ${ECHO_CMD} "Launching iostat in the Background and saving Results to ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
-touch ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP
+touch "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP"
 
 # !! Does NOT work in BUSYBOX / initramfs shell (especially if Variable Contains Spaces, only the space is retained) !!
 #set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
-
-set -- $allDevices
-iostat -dk -zyx $@ ${IOSTAT_INTERVAL} ${IOSTAT_COUNT} > ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP &
+#set -- $allDevices
+#iostat -dk -zyx $@ ${IOSTAT_INTERVAL} ${IOSTAT_COUNT} > ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP &
+iostat -dk -zyx "$physicalDevice0" "$physicalDevice1" "$luksDevice0" "$luksDevice1" "$loopDevice0" "$loopDevice1" "${IOSTAT_INTERVAL}" "${IOSTAT_COUNT}" > "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" &
 
 # Then try to periodically send via Netcat
-#send_iostat_to_netcat &
+send_iostat_to_netcat &
 
 # Force zpool reopen
 # Disabled for testing on Real Booting System
@@ -393,12 +432,12 @@ then
     then
         ${ECHO_CMD} "Dumping journalctl -xb --no-pager to /var/log/journalctl-xb.debug.$TIMESTAMP" | log_data
         ${ECHO_CMD} "============================================================================================================================================================" | log_data
-        /usr/bin/journalctl -xb --no-pager > /var/log/journalctl-xb.debug.$TIMESTAMP
+        /usr/bin/journalctl -xb --no-pager > "/var/log/journalctl-xb.debug.$TIMESTAMP"
         ${ECHO_CMD} "============================================================================================================================================================" | log_data
     fi
 fi
 
-# If Running on a Live System, also send journalctl -xb to Remote Netcat Server
+# If Running on a Live System, also send dpkg -l --no-pager to Remote Netcat Server
 if [ -x "/usr/bin/dpkg" ]
 then
     # List Installed Packages
@@ -408,6 +447,7 @@ then
     ${ECHO_CMD} "============================================================================================================================================================" | log_data
 fi
 
+# If Running on a Live System, also send enabled units / unit files to Remote Netcat Server
 if [ -x "/usr/bin/systemctl" ]
 then
     # List Systemd Units
