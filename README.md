@@ -455,13 +455,14 @@ mv /usr/lib/systemd/system-generators/systemd-cryptsetup-generator /root/systemd
 The System got back on its Feet after several Days of Troubleshooting and several Procedurs, some of which might **NOT** be required:
 01. ~~Changing from Intel Sata Controller to LSI HBA - This probably made the "Real System" Boot Situation worse, based on the outcome (see below)~~
 02. Configure Loop Devices in `chroot`
-03. Configure `/etc/default/zfs` to Forcefully use the Cachefile during Import at Boot
-04. Regenerate `/etc/zfs/zpool.cache` each Time before rebuilding the Initramfs (from LiveUSB in particular since imports default to the LUKS Device "Directly", NOT the LOOP Device, that needs to be Configured later)
-05. Issue `zpool reopen` and/or `zpool reopen rpool`
-06. Disable `systemd-cryptsetup` Service
-07. Disable `systemd-cryptsetup-generator` Generator
-08. (Re)Move `/usr/lib/systemd/system-generators/systemd-cryptsetup-generator`
-09. Symlinking `/etc/systemd/system-generators/systemd-cryptsetup-generator` to `/dev/null`
+03. Change Device Paths using `zpool set path=/dev/loop/xxx_loop rpool xxx_crypt`
+04. Configure `/etc/default/zfs` to Forcefully use the Cachefile during Import at Boot
+05. Regenerate `/etc/zfs/zpool.cache` each Time before rebuilding the Initramfs (from LiveUSB in particular since imports default to the LUKS Device "Directly", NOT the LOOP Device, that needs to be Configured later)
+06. Issue `zpool reopen` and/or `zpool reopen rpool`
+07. Disable `systemd-cryptsetup` Service
+08. Disable `systemd-cryptsetup-generator` Generator
+09. (Re)Move `/usr/lib/systemd/system-generators/systemd-cryptsetup-generator`
+10. Symlinking `/etc/systemd/system-generators/systemd-cryptsetup-generator` to `/dev/null`
 
 Most of the work in this Repository (unfortunately) was on `usr/sbin/looptab-debug` to Troubleshoot these weird Boot-Time Issues.
 
