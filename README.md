@@ -451,20 +451,106 @@ ln -s /dev/null /etc/systemd/system-generators/systemd-cryptsetup-generator
 mv /usr/lib/systemd/system-generators/systemd-cryptsetup-generator /root/systemd-cryptsetup-generator.disabled
 ```
 
-# Analysis of the Issue
+# Post-Analysis of the Issue
+
+## Background
 Originally the Issue showed up using an Intel onboard SATA Controller.
+
+System Information:
+- Motherboard: Supermicro X11SSL-F with BIOS 3.3
+- CPU: Intel Xeon E3 1240 v5
+- RAM: 64GB DDR4 Unbuffered ECC RAM 2666MHz running at 2133 MHz
+- Onboard SATA Controller Used (White SATA Ports)
+- ![Motherboard Image]https://private-user-images.githubusercontent.com/7126291/357674713-7c95d991-5ca8-4afe-a848-b4102d21bb5e.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjQ1MTYwNDksIm5iZiI6MTcyNDUxNTc0OSwicGF0aCI6Ii83MTI2MjkxLzM1NzY3NDcxMy03Yzk1ZDk5MS01Y2E4LTRhZmUtYTg0OC1iNDEwMmQyMWJiNWUucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI0MDgyNCUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNDA4MjRUMTYwOTA5WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9NjA4MDY3ZGIwN2ZiODFiOWZiYjEwNDY0Y2VjYmUyNTE5N2RiOGViOTMxODhjNWE0MDhiYTgyMzA5MGVjY2MyYyZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.6UNFYg_P_zHX579VynL3kGwIX-snJWOpZG_meaN5pT0
+- Alternative test using LSI 9217-4i4e Cross-flashed to IT Model P20 Firmware + BIOS Boot ROM (which is the Current Configuration)
+- Disks: Crucial MX500 1000GB from 2022, FW 046 (upgraded from 042 or 043 in order to Prevent some known BUGs)
+
+Real System:
+- Arch: AMD64
+- OS: Proxmox VE on top of Debian GNU/Linux 12 Bookworm
+- Kernel: probably proxmox-kernel-6.8.8-3-pve-signed (if I did NOT reboot after the last System Update) or proxmox-kernel-6.8.12-1-pve-signed although it's NOT marked as installed even though /boot/vmlinuz-6.8.12-1-pve exists (if I DID reboot after the last System Update)
+- ZFS: 2.2.4 from Proxmox Repository (pve-no-subscription)
+  ```
+  zfs-2.2.4-pve1
+  zfs-kmod-2.2.4-pve1
+  ```
+
+LiveUSB System:
+- Arch: AMD64
+- OS: Debian GNU/Linux 12 Bookworm AMD with Kernel+ZFS from Backports Repository
+- Kernel: linux-image-6.9.7+bpo-amd64 or linux-image-6.7.12+bpo-amd64, I will try to always boot with linux-image-6.7.12+bpo-amd64 in order to keep a "compliant" Kernel "officially" supported by ZFS (<= Kernel 6.8.x)
+- ZFS: 2.2.4 from Debian Backports
+
+```
+zfs-2.2.4-1~bpo12+1
+zfs-kmod-2.2.4-1~bpo12+1
+```
 
 As Part of the Troubleshooting, I switched over to a LSI 9217-4i4e HBA with Firmware P20 in IT Mode + BIOS (in order to enable booting from the SSDs attached to the HBA).
 
-The Issue got solved by setting up the Loop Device in chroot **AND** issueing `zpool reopen` and/or `zpool reopen rpool`.
+## Solving the Issue in Chroot Environment on LiveUSB
+The Issue got solved/worked around/fixed by:
+1. Setting up the Loop Device from within the Chroot Environment **AND**
+2. Issueing `zpool reopen` and/or `zpool reopen rpool`
 
-HOWEVER, there was still something not working once the Real System would boot (e.g. `systemd-cryptsetup`, `systemd-cryptsetup-generator` and their associated Children closing the LUKS Device while it was in use on this System, for some weird Reason).
+This is most likely the Procedure that will also work for Data Disk (**NOT** "/", `rpool`, ZFS on Root, etc) on a "normal" System (**NOT** chroot, liveusb, etc).
 
-However, once I switched back to using the Onboard Intel SATA Controller, the System booted up without Issues.
+## Solving the Issue on the Real Proxmox VE System
+However, there was still something not working once the Real System would boot.
 
-Points worth maybe to be further investigated:
+### Replace ROOT Filesystem with Copy from working System
+An attempt was made to replace `rpool/ROOT/debian` from the Faulty System with `rpool/ROOT/debian` from a very similar and known working System which had already undergone the LOOP Device "Hack" described in this Repository.
+Once restored, modifications/restore from Backup were required to the following Files (YMMV):
+- `/etc/hostname`
+- `/etc/hosts`
+- `/etc/fstab` (change UUID for `/boot` and `/boot/efi` Devices)
+- `/etc/mdadm/boot.mdadm` (change `/dev/disk/by-id/` to Match the Names of the Physical Disks)
+- `/etc/mdadm/efi.mdadm` (change `/dev/disk/by-id/` to Match the Names of the Physical Disks)
+- `/etc/mailname`
+- `/etc/salt` (including Minion/Master Keys)
+- `/var/log/salt`
+- `/var/lib/pve-cluster`
+- `/var/lib/pve-firewall`
+- `/var/lib/pve-manager`
+- `/etc/crypttab` (change UUID for the LUKS Encrypted Partition)
+- `/etc/looptab`
+- `/etc/network/interfaces`
+- `/etc/ssh/ssh_host_*` (SSH Keys - Forgot that)
+- The usual ... `update-grub` , `update-initramfs -k all -u`, etc
+
+In particular the Proxmox VE Configuration Database `/var/lib/pve-cluster` is Key to get `/etc/pve` working correctly after next Reboot.
+
+### Manually disabling some Systemd Services
+In Particular, the following Systemd Services/Generators would attempt to close the LUKS Device while it was in use on this System, for some weird Reason:
+- `systemd-cryptsetup` 
+- `systemd-cryptsetup-generator`
+- Their associated "Children" / Automatically Generated Services:
+  - `systemd-cryptsetup@ata\x2dCT1000MX500SSD1_2205E6057147_crypt.service`
+  - `systemd-cryptsetup@ata\x2dCT1000MX500SSD1_2205E605725B_crypt.service`
+
+Even after disabling those according to the Instructions in the upper Section of this README (including removing the `/usr/lib/systemd/system-generators/systemd-cryptsetup-generator` File to make absolutely sure that Systemd wouldn't do something weird with it), the `zio` Barrage of Errors would keep going after the System booted up !
+
+### Switching back from the LSI HBA to the Onboard Intel SATA Controller
+Out of Ideas, I decided to swich back to the Onboard Intel SATA Controller, and at that Point the System booted up without Issues.
+
+### Points for further Evaluation
+This **migh** (or NOT !) be related to lack of TRIM Support on LSI HBA and/or some weird Issue when using LSI HBA with IT P20 Firmware + BIOS (in order to be able to boot the System from them).
+From the Logs it would seem that some Power Management Commands are sent to the Drives.
+
+Anectdotally it seems that booting from the LSI HBA, once the BIOS reached the Point where it's loading the OS / Bootloader from the SSD or HDD, is MUCH slower (e.g. 15s from LSI HBA vs 1-2s from Intel SATA Controller), with all other Things being equal (LSI HBA is still physically installed in the System, LSI HBA BIOS is still loading & scanning, etc). Literally loading GRUB and the first lines of Linux Kernel Output are just **MUCH SLOWER**.
+
+Points worth maybe to be further investigated, in case the Issue is related to the LSI HBA:
 - Disable TRIM in `/etc/crypttab` (**remove** `discard` from `/etc/crypttab` for each Device)
 - Disable Systemd `fstrim` Service: `systemctl disable fstrim.service`
+
+Points worth maybe to be reverted:
+- Re-enable `systemd-cryptsetup`
+- Re-enable `systemd-cryptsetup-generator`
+
+# Credits
+Many thanks for the extensive Support I received on the #openzfs IRC Channel on Libera.chat.
+
+In partical Users pmt and robn for a lot of Sparring/Brainstorming, helping in Log Analysis as well as providing Feedback.
 
 # Development
 In order to test that Things are **actually** working the way the **should**, it's not sufficient to run the `/usr/sbin/looptab-debug` on a Modern System.
