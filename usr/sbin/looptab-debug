@@ -120,18 +120,18 @@ send_iostat_to_netcat() {
         currentTimestamp=`date +"%Y%m%d_%H%M%S"`
 
         # Echo
-        ${ECHO_CMD} "Start Sending ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | log_data
-        ${ECHO_CMD} "============================================================================================================================================================" | log_data
+        /usr/bin/echo "Start Sending ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | log_data
+        /usr/bin/echo "============================================================================================================================================================" | log_data
 
         # Send Data
-        ${CAT_CMD} "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
+        /usr/bin/cat "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
 
         # Echo
-        ${ECHO_CMD} "Finished Sending ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | log_data
-        ${ECHO_CMD} "============================================================================================================================================================" | log_data
+        /usr/bin/echo "Finished Sending ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP at Datetime = $currentTimestamp"  | log_data
+        /usr/bin/echo "============================================================================================================================================================" | log_data
 
         # Wait
-        sleep ${IOSTAT_INTERVAL}
+        /usr/bin/sleep ${IOSTAT_INTERVAL}
 
         # Increase Counter
         netcatLoopCounter=$((netcatLoopCounter+1))
