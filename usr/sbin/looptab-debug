@@ -437,6 +437,12 @@ then
     fi
 fi
 
+# Send Result of iostat Background Job to Remote Netcat Server
+${ECHO_CMD} "Sending Result of iostat Background Job ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP to Remote Netcat Server" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
+${CAT_CMD} "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
+${ECHO_CMD} "============================================================================================================================================================" | log_data
+
 # If Running on a Live System, also send dpkg -l --no-pager to Remote Netcat Server
 if [ -x "/usr/bin/dpkg" ]
 then
