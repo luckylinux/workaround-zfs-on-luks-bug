@@ -463,6 +463,7 @@ The System got back on its Feet after several Days of Troubleshooting and severa
 08. Disable `systemd-cryptsetup-generator` Generator
 09. (Re)Move `/usr/lib/systemd/system-generators/systemd-cryptsetup-generator`
 10. Symlinking `/etc/systemd/system-generators/systemd-cryptsetup-generator` to `/dev/null`
+11. Restoring/Replacing `rpool/ROOT/debian` from a similar & known working System that already underwent the Modification described in this Repository and "survived" the Reboot without Particular Issues
 
 Most of the work in this Repository (unfortunately) was on `usr/sbin/looptab-debug` to Troubleshoot these weird Boot-Time Issues.
 
@@ -565,6 +566,17 @@ Points worth maybe to be further investigated, in case the Issue is related to t
 Points worth maybe to be reverted:
 - Re-enable `systemd-cryptsetup`
 - Re-enable `systemd-cryptsetup-generator`
+
+### Possible Race Condition at Boot Time
+There is a **Possible Race Condition at Boot Time** between several Systemd Services and LOOP/LUKS/Physical Devices/UDEV/Partition Rescan.
+
+The rescan (probably done by `systemd-udevd`)  might be getting delayed in the boot process with the LSI HBA (which is a bit slower - apparently), which can cause this bad Interaction, where `systemd` Services attempt to remove a Device which is in use by the ZFS Pool (and LUKS and LOOP).
+
+That probably indicates a Race Condition (either way, both with the LSI HBA and the Onboard Intel SATA HBA), and without the LSI HBA it seems to "go through" without hitting this BUG / Race Condition.
+
+This anyways feels like something is very much "on the edge" and very sensitive in terms of Timings.
+
+Possibly, with the Intel Sata Controller, the boot process is "just enough" faster that the Timings don't "conflict".
 
 # Credits
 Many thanks for the extensive Support I received on the #openzfs IRC Channel on Libera.chat.
