@@ -113,6 +113,9 @@ TIMESTAMP=`date +"%Y%m%d-%H%M%S"`
 
 # Custom Function to send IOStat to Netcat
 send_iostat_to_netcat() {
+    # Enable Verbose Output
+    set -x
+
     # Initialize counter
     netcatLoopCounter=0
 
