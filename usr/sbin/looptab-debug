@@ -24,6 +24,11 @@ fi
 IOSTAT_INTERVAL="1"
 IOSTAT_COUNT=60
 
+# Try to disable these if you have problems getting the full log over netcat (this creates additional write Requests to the already misbehaving Drive)
+IOSTAT_ENABLE_ONEOFF=0
+IOSTAT_ENABLE_LOOP=0
+
+
 # Custom Commands
 ECHO_CMD="/usr/bin/echo"
 #PRINTF_CMD="/usr/bin/printf"
@@ -87,7 +92,7 @@ log_data() {
     #${ECHO_CMD} -e "$ldata" | ${NC_BIN} ${NC_OPTIONS}
 
     # Return Gracefully
-    return 0
+    #return 0
 }
 
 # Echo again to Netcat this Time
@@ -362,25 +367,35 @@ ${ECHO_CMD} "===================================================================
 ${ECHO_CMD} "Analysing iostat Ouput (one-off)" | log_data
 ${ECHO_CMD} "============================================================================================================================================================" | log_data
 
-# !! Does NOT work in BUSYBOX / initramfs shell (especially if Variable Contains Spaces, only the space is retained) !!
-#set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
-#set -- $allDevices
-#iostat -dk -zyx $@ ${IOSTAT_INTERVAL} 1 | log_data
-iostat -dk -zyx "$physicalDevice0" "$physicalDevice1" "$luksDevice0" "$luksDevice1" "$loopDevice0" "$loopDevice1" "${IOSTAT_INTERVAL}" 1 | log_data
-${ECHO_CMD} "============================================================================================================================================================" | log_data
 
-# Launch "iostat" in the Background and save to File
-${ECHO_CMD} "Launching iostat in the Background and saving Results to ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
-touch "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP"
+if [ ${IOSTAT_ENABLE_ONEOFF} -eq 1 ]
+then
+    # !! Does NOT work in BUSYBOX / initramfs shell (especially if Variable Contains Spaces, only the space is retained) !!
+    #set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
+    #set -- $allDevices
+    #iostat -dk -zyx $@ ${IOSTAT_INTERVAL} 1 | log_data
+    iostat -dk -zyx "$physicalDevice0" "$physicalDevice1" "$luksDevice0" "$luksDevice1" "$loopDevice0" "$loopDevice1" "${IOSTAT_INTERVAL}" 1 | log_data
+    ${ECHO_CMD} "============================================================================================================================================================" | log_data
+fi
 
-# !! Does NOT work in BUSYBOX / initramfs shell (especially if Variable Contains Spaces, only the space is retained) !!
-#set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
-#set -- $allDevices
-#iostat -dk -zyx $@ ${IOSTAT_INTERVAL} ${IOSTAT_COUNT} > ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP &
-iostat -dk -zyx "$physicalDevice0" "$physicalDevice1" "$luksDevice0" "$luksDevice1" "$loopDevice0" "$loopDevice1" "${IOSTAT_INTERVAL}" "${IOSTAT_COUNT}" > "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" &
+if [ ${IOSTAT_ENABLE_LOOP} -eq 1 ]
+then
+    # Launch "iostat" in the Background and save to File
+    ${ECHO_CMD} "Launching iostat in the Background and saving Results to ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" | log_data
+    touch "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP"
 
-# Then try to periodically send via Netcat
-send_iostat_to_netcat &
+    # !! Does NOT work in BUSYBOX / initramfs shell (especially if Variable Contains Spaces, only the space is retained) !!
+    #set -- ${physicalDevicesList} ${luksDevicesList} ${loopDevicesList}
+    #set -- $allDevices
+    #iostat -dk -zyx $@ ${IOSTAT_INTERVAL} ${IOSTAT_COUNT} > ${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP &
+
+    # Try to disable this if you have problems getting the full log over netcat (this creates additional write Requests to the already misbehaving Drive)
+    iostat -dk -zyx "$physicalDevice0" "$physicalDevice1" "$luksDevice0" "$luksDevice1" "$loopDevice0" "$loopDevice1" "${IOSTAT_INTERVAL}" "${IOSTAT_COUNT}" > "${LOG_BASEFOLDER}/iostat.debug.$TIMESTAMP" &
+
+    # Then try to periodically send via Netcat
+    # Try to disable this if you have problems getting the full log over netcat
+    send_iostat_to_netcat &
+fi
 
 # Force zpool reopen
 # Disabled for testing on Real Booting System
