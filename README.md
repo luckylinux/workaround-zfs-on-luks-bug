@@ -417,23 +417,29 @@ systemctl start rc-local.service
 systemctl status rc-local.service
 ```
 
-# Old Stuff
-Replace Drives and Fix Path (Second Attempt - Device Paths were changed back to devid since the Loop Device couldn't be found)
+# Development
+In order to test that Things are **actually** working the way the **should**, it's not sufficient to run the `/usr/sbin/looptab-debug` on a Modern System.
 
-```
-zpool set path=/dev/loop/ata-CT1000MX500SSD1_2301E6992CB7_loop rpool dm-uuid-CRYPT-LUKS2-b5ed1ef4aecb4404b68229f2a8a253c3-ata-CT1000MX500SSD1_2301E6992CB7_crypt
-```
+That would most likely run under the `bash` Shell or possibly the `zsh` Shell, depending on your System Configuration.
 
-```
-zpool set path=/dev/loop/ata-CT1000MX500SSD1_2302E69AD9D0_loop rpool dm-uuid-CRYPT-LUKS2-471885256c014364874b5ddc0ee2dca3-ata-CT1000MX500SSD1_2302E69AD9D0_crypt
-```
+Even when running using the `dash` Shell, the Behaviour is quite significantly different compared to what happens in Initramfs.
 
-Regenerate Cachefile
+For this reason it's suggested to first invoke the `busybox` Shell:
 ```
-zpool set cachefile=/etc/zfs/zpool.cache rpool
+/usr/bin/busybox sh
 ```
 
-Regenerate initramfs:
+And run the `looptab-debug` Script from there:
 ```
-update-initramfs -v -k all -u
+/usr/sbin/looptab-debug
 ```
+
+Or in one Command:
+```
+/usr/bin/busybox sh -c /usr/sbin/looptab-debug
+```
+
+Keep in mind that many Binaries/Executables in the initramfs Shell are "minimal" Versions of their "normal" (full-fledged) self.
+This applies for instance to:
+- (Confirmed) `losetup` (several flags are NOT recognized by the default `losetup` Binary included in initramfs, which is why `losetup-full` has been included as the "full" Version)
+- (Probably) `nc` (included `nc-full` to ensure consistency between initramfs and the normal/chroot System, so `nc` expects/uses the same Flags)
