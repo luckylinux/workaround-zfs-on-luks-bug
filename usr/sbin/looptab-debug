@@ -42,17 +42,17 @@ if [ -f "/etc/looptab-debug" ]
 then
     . "/etc/looptab-debug"
 else
-    # Exit
+    # Stop Script if Debug is NOT configured (Exit normally)
     ${ECHO_CMD} "Debug NOT configured in /etc/looptab-debug: File does NOT exist"
-    exit 9
+    exit 0
 fi
 
 # Check Configuration Parameter
 if [ "${LOOPTAB_DEBUG_ENABLE}" != "yes" ]
 then
-    # Stop Script if Debug is NOT enabled
+    # Stop Script if Debug is NOT enabled (exit normally)
     ${ECHO_CMD} "Debug Disabled in /etc/looptab-debug: LOOPTAB_DEBUG_ENABLE = ${LOOPTAB_DEBUG_ENABLE}"
-    exit 8
+    exit 0
 fi
 
 
