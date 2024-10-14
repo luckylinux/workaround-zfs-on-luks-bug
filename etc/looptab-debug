@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Enable Verbose Output
+set -x
+
+# "yes" to Enable
+LOOPTAB_DEBUG_ENABLE="no"

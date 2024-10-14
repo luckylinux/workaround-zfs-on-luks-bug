@@ -11,6 +11,13 @@ then
    cp etc/looptab /etc/looptab
 fi
 
+# If /etc/looptab-debug does NOT exist yet, copy Default Configuration
+if [ ! -f "/etc/looptab-debug" ]
+then
+   # Copy Example File
+   cp etc/looptab-debug /etc/looptab-debug
+fi
+
 # Copy initramfs-tools Hooks
 cp -r usr/share/initramfs-tools/hooks/* /usr/share/initramfs-tools/hooks/
 

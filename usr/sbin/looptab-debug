@@ -37,6 +37,25 @@ CAT_CMD="/usr/bin/cat"
 # Echo
 ${ECHO_CMD} "Executing $0 from Source=$sourceValue (Message: $messageValue)"
 
+# Load Configuration File
+if [ -f "/etc/looptab-debug" ]
+then
+    . "/etc/looptab-debug"
+else
+    # Exit
+    ${ECHO_CMD} "Debug NOT configured in /etc/looptab-debug: File does NOT exist"
+    exit 9
+fi
+
+# Check Configuration Parameter
+if [ "${LOOPTAB_DEBUG_ENABLE}" != "yes" ]
+then
+    # Stop Script if Debug is NOT enabled
+    ${ECHO_CMD} "Debug Disabled in /etc/looptab-debug: LOOPTAB_DEBUG_ENABLE = ${LOOPTAB_DEBUG_ENABLE}"
+    exit 8
+fi
+
+
 # Netcat Configuration
 # Load from File if it exists
 if [ -f "/etc/netcat" ]

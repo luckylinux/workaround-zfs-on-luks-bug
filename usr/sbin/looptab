@@ -75,6 +75,11 @@ do
     # Extract "Loop" Device with Custom Name (full Path)
     loopDeviceCustomName=`echo "$line" | cut -f3 -d'	'`
 
+    # Extract "Options"
+    loopDeviceOptions=`echo "$line" | cut -f4 -d'       '`
+
+    echo "Options: <$loopDeviceOptions>"
+
     # Build "Standardized" Device Path
     loopDevicePath="/dev/loop$loopDeviceNumber"
 

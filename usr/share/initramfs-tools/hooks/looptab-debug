@@ -52,5 +52,12 @@ then
     copy_file config "/etc/netcat"
 fi
 
+# Copy /etc/looptab-debug if it exists
+if [ -f "/etc/looptab-debug" ]
+then
+   # Copy Configuration File
+    copy_file config "/etc/looptab-debug"
+fi
+
 # Return OK
 exit 0
