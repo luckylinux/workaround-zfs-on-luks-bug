@@ -26,7 +26,7 @@ do
         loopDevicePath="/dev/loop/$loopDeviceName"
 
         # Add Line to /etc/looptab
-        echo -e "$loopDeviceCounter	$cryptDevicePath	$loopDevicePath" >> /etc/looptab
+        echo -e "$loopDeviceCounter	$cryptDevicePath	$loopDevicePath	0" >> /etc/looptab
 
         # Increase Counter
         loopDeviceCounter=$((loopDeviceCounter+1))
