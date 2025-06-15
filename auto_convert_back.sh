@@ -46,7 +46,7 @@ do
            luksDeviceName="$value"
 
            # Set LUKS Device Name
-           luksDeviceName=`echo $luksDeviceName | sed -E "s|^(/dev/loop/)?([0-9a-zA-Z_-]+)_loop$|/dev/mapper/\2_crypt|"`
+           luksDeviceName=`echo $luksDeviceName | sed -E "s|^(/dev/loop/)?([0-9a-zA-Z_-]+)_loop$|\2_crypt|"`
 
            # If Device Name still ends with _loop, replace it with _crypt
            luksDeviceName=`echo $luksDeviceName | sed -E "s|^([0-9a-zA-Z_-]+)_(loop)?$|\1_crypt|"`
